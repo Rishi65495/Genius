@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
 <meta name="theme-color" content="#17251d" />
 <title>Leafline | Reading Studio</title>
 
@@ -28,62 +28,54 @@
   --blue: #b6d9e0;
   --purple: #c8b9df;
   --danger: #bd625b;
-  --shadow-sm: 0 8px 24px rgba(24, 51, 35, .06);
-  --shadow-md: 0 18px 60px rgba(24, 51, 35, .10);
-  --shadow-lg: 0 30px 100px rgba(24, 51, 35, .18);
+  --shadow-sm: 0 8px 24px rgba(24,51,35,.06);
+  --shadow-md: 0 18px 60px rgba(24,51,35,.10);
+  --shadow-lg: 0 30px 100px rgba(24,51,35,.18);
   --radius-sm: 12px;
   --radius-md: 20px;
   --radius-lg: 30px;
   --sidebar-width: 264px;
   --topbar-height: 80px;
+  --bottom-nav-height: 0px;
 }
 
-* {
-  box-sizing: border-box;
-}
-
-html {
-  scroll-behavior: smooth;
-}
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
 
 body {
   margin: 0;
   min-width: 320px;
   background:
-    radial-gradient(circle at 87% 3%, rgba(198, 223, 131, .30), transparent 22rem),
-    radial-gradient(circle at 4% 88%, rgba(239, 157, 109, .14), transparent 25rem),
+    radial-gradient(circle at 87% 3%, rgba(198,223,131,.30), transparent 22rem),
+    radial-gradient(circle at 4% 88%, rgba(239,157,109,.14), transparent 25rem),
     #f3f6f0;
   color: var(--ink);
   font-family: "DM Sans", sans-serif;
 }
 
-button,
-input,
-textarea,
-select {
-  font: inherit;
-}
-
-button {
-  cursor: pointer;
-}
-
-button:focus-visible,
-input:focus-visible,
-textarea:focus-visible,
-select:focus-visible {
-  outline: 3px solid rgba(59, 121, 87, .28);
+button, input, textarea, select { font: inherit; }
+button { cursor: pointer; }
+button:focus-visible, input:focus-visible, textarea:focus-visible, select:focus-visible {
+  outline: 3px solid rgba(59,121,87,.28);
   outline-offset: 2px;
 }
+a { color: inherit; text-decoration: none; }
 
-a {
-  color: inherit;
-  text-decoration: none;
+/* OVERLAY */
+.sidebar-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 9;
+  background: rgba(14,29,20,.50);
+  backdrop-filter: blur(5px);
+  -webkit-backdrop-filter: blur(5px);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity .3s ease;
 }
+.sidebar-overlay.open { opacity: 1; pointer-events: auto; }
 
-.app-shell {
-  min-height: 100vh;
-}
+.app-shell { min-height: 100vh; }
 
 .sidebar {
   position: fixed;
@@ -91,11 +83,32 @@ a {
   z-index: 10;
   width: var(--sidebar-width);
   padding: 28px 18px 20px;
-  background: rgba(255, 255, 252, .70);
-  border-right: 1px solid rgba(215, 225, 215, .90);
+  background: rgba(255,255,252,.70);
+  border-right: 1px solid rgba(215,225,215,.90);
   backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
   display: flex;
   flex-direction: column;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+
+.sidebar-close {
+  display: none;
+  position: absolute;
+  top: 16px;
+  right: 14px;
+  width: 32px;
+  height: 32px;
+  border: 0;
+  border-radius: 50%;
+  background: var(--sage);
+  color: var(--ink);
+  font-size: 20px;
+  line-height: 1;
+  align-items: center;
+  justify-content: center;
+  z-index: 1;
 }
 
 .brand {
@@ -117,16 +130,15 @@ a {
   color: white;
   font-family: "DM Serif Display", serif;
   font-size: 25px;
-  box-shadow: 0 9px 24px rgba(36, 79, 58, .22);
+  box-shadow: 0 9px 24px rgba(36,79,58,.22);
+  flex: 0 0 auto;
 }
 
 .brand-mark::after {
   content: "";
   position: absolute;
-  right: 5px;
-  bottom: 5px;
-  width: 7px;
-  height: 7px;
+  right: 5px; bottom: 5px;
+  width: 7px; height: 7px;
   border-radius: 50%;
   background: var(--lime);
 }
@@ -147,10 +159,7 @@ a {
   text-transform: uppercase;
 }
 
-.navigation {
-  display: grid;
-  gap: 5px;
-}
+.navigation { display: grid; gap: 5px; }
 
 .nav-label {
   padding: 13px 14px 8px;
@@ -166,6 +175,7 @@ a {
   align-items: center;
   gap: 13px;
   width: 100%;
+  min-height: 44px;
   padding: 13px 14px;
   border: 0;
   border-radius: 14px;
@@ -176,29 +186,12 @@ a {
   text-align: left;
   transition: .2s ease;
 }
+.nav-item:hover { background: var(--sage-2); color: var(--forest); transform: translateX(2px); }
+.nav-item.active { background: var(--forest); color: white; box-shadow: 0 10px 25px rgba(36,79,58,.17); }
 
-.nav-item:hover {
-  background: var(--sage-2);
-  color: var(--forest);
-  transform: translateX(2px);
-}
+.nav-icon { display: grid; place-items: center; width: 20px; font-size: 17px; }
 
-.nav-item.active {
-  background: var(--forest);
-  color: white;
-  box-shadow: 0 10px 25px rgba(36, 79, 58, .17);
-}
-
-.nav-icon {
-  display: grid;
-  place-items: center;
-  width: 20px;
-  font-size: 17px;
-}
-
-.sidebar-bottom {
-  margin-top: auto;
-}
+.sidebar-bottom { margin-top: auto; }
 
 .ambient-card {
   position: relative;
@@ -207,33 +200,18 @@ a {
   padding: 17px;
   border-radius: 20px;
   background:
-    linear-gradient(135deg, rgba(36, 79, 58, .96), rgba(59, 121, 87, .89)),
+    linear-gradient(135deg, rgba(36,79,58,.96), rgba(59,121,87,.89)),
     repeating-linear-gradient(45deg, transparent, transparent 10px, rgba(255,255,255,.06) 11px);
   color: white;
 }
-
-.ambient-card::before,
-.ambient-card::after {
+.ambient-card::before, .ambient-card::after {
   content: "";
   position: absolute;
   border: 1px solid rgba(255,255,255,.18);
   border-radius: 50%;
 }
-
-.ambient-card::before {
-  width: 100px;
-  height: 100px;
-  right: -40px;
-  top: -35px;
-}
-
-.ambient-card::after {
-  width: 150px;
-  height: 150px;
-  right: -64px;
-  top: -60px;
-}
-
+.ambient-card::before { width: 100px; height: 100px; right: -40px; top: -35px; }
+.ambient-card::after  { width: 150px; height: 150px; right: -64px; top: -60px; }
 .ambient-card small {
   color: #d3ead3;
   font-family: "Space Mono", monospace;
@@ -241,7 +219,6 @@ a {
   letter-spacing: 1px;
   text-transform: uppercase;
 }
-
 .ambient-card strong {
   display: block;
   position: relative;
@@ -252,7 +229,6 @@ a {
   font-size: 19px;
   line-height: 1.1;
 }
-
 .ambient-button {
   position: relative;
   z-index: 1;
@@ -277,8 +253,7 @@ a {
   display: grid;
   place-items: center;
   flex: 0 0 auto;
-  width: 36px;
-  height: 36px;
+  width: 36px; height: 36px;
   border-radius: 50%;
   background: linear-gradient(135deg, #dc9877, #b86355);
   color: white;
@@ -286,17 +261,8 @@ a {
   font-weight: 800;
 }
 
-.profile-name {
-  font-size: 12px;
-  font-weight: 800;
-}
-
-.profile-role {
-  display: block;
-  margin-top: 3px;
-  color: var(--muted);
-  font-size: 10px;
-}
+.profile-name { font-size: 12px; font-weight: 800; }
+.profile-role { display: block; margin-top: 3px; color: var(--muted); font-size: 10px; }
 
 .main {
   width: calc(100% - var(--sidebar-width));
@@ -310,9 +276,32 @@ a {
   min-height: var(--topbar-height);
   align-items: center;
   justify-content: space-between;
-  gap: 25px;
-  border-bottom: 1px solid rgba(215, 225, 215, .75);
+  gap: 20px;
+  border-bottom: 1px solid rgba(215,225,215,.75);
+  position: sticky;
+  top: 0;
+  z-index: 7;
+  background: rgba(243,246,240,.88);
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+  margin: 0 -42px;
+  padding: 0 42px;
 }
+
+/* topbar brand - mobile only */
+.topbar-brand {
+  display: none;
+  align-items: center;
+  gap: 9px;
+  flex: 1;
+}
+.topbar-brand .brand-mark {
+  width: 34px; height: 34px;
+  font-size: 20px;
+  border-radius: 12px 12px 12px 3px;
+  box-shadow: 0 6px 16px rgba(36,79,58,.20);
+}
+.topbar-brand .brand-name { font-size: 20px; }
 
 .breadcrumb {
   display: flex;
@@ -322,16 +311,9 @@ a {
   font-size: 11px;
   font-weight: 700;
 }
+.breadcrumb b { color: var(--forest); }
 
-.breadcrumb b {
-  color: var(--forest);
-}
-
-.topbar-actions {
-  display: flex;
-  align-items: center;
-  gap: 9px;
-}
+.topbar-actions { display: flex; align-items: center; gap: 9px; }
 
 .search-box {
   display: flex;
@@ -344,11 +326,9 @@ a {
   background: rgba(255,255,255,.7);
   color: var(--muted);
 }
-
 .search-box input {
   width: 100%;
-  border: 0;
-  outline: 0;
+  border: 0; outline: 0;
   background: transparent;
   color: var(--ink);
   font-size: 12px;
@@ -357,84 +337,39 @@ a {
 .top-icon {
   display: grid;
   place-items: center;
-  width: 39px;
-  height: 39px;
+  width: 39px; height: 39px;
   border: 1px solid var(--line);
   border-radius: 12px;
   background: rgba(255,255,255,.75);
   color: var(--muted);
 }
+.top-icon:hover { color: var(--forest); border-color: var(--sage); }
 
-.top-icon:hover {
-  color: var(--forest);
-  border-color: var(--sage);
-}
-
-.primary-button,
-.secondary-button,
-.ghost-button,
-.danger-button {
+.primary-button, .secondary-button, .ghost-button, .danger-button {
   border-radius: 12px;
   padding: 11px 15px;
   font-size: 12px;
   font-weight: 800;
   transition: .2s ease;
 }
-
 .primary-button {
   border: 1px solid var(--forest);
   background: var(--forest);
   color: white;
   box-shadow: 0 8px 20px rgba(36,79,58,.13);
 }
+.primary-button:hover { background: #163c2a; transform: translateY(-1px); }
+.secondary-button { border: 1px solid var(--line); background: white; color: var(--forest); }
+.secondary-button:hover { border-color: var(--forest-2); background: var(--sage-2); }
+.ghost-button { border: 0; background: transparent; color: var(--muted); }
+.danger-button { border: 1px solid rgba(189,98,91,.2); background: #fff1ef; color: var(--danger); }
 
-.primary-button:hover {
-  background: #163c2a;
-  transform: translateY(-1px);
-}
-
-.secondary-button {
-  border: 1px solid var(--line);
-  background: white;
-  color: var(--forest);
-}
-
-.secondary-button:hover {
-  border-color: var(--forest-2);
-  background: var(--sage-2);
-}
-
-.ghost-button {
-  border: 0;
-  background: transparent;
-  color: var(--muted);
-}
-
-.danger-button {
-  border: 1px solid rgba(189, 98, 91, .2);
-  background: #fff1ef;
-  color: var(--danger);
-}
-
-.page {
-  display: none;
-  padding-top: 34px;
-  animation: page-in .35s ease both;
-}
-
-.page.active {
-  display: block;
-}
+.page { display: none; padding-top: 34px; animation: page-in .35s ease both; }
+.page.active { display: block; }
 
 @keyframes page-in {
-  from {
-    opacity: 0;
-    transform: translateY(7px);
-  }
-  to {
-    opacity: 1;
-    transform: none;
-  }
+  from { opacity: 0; transform: translateY(7px); }
+  to   { opacity: 1; transform: none; }
 }
 
 .page-heading {
@@ -454,69 +389,26 @@ a {
   text-transform: uppercase;
 }
 
-h1,
-h2,
-h3,
-h4,
-p {
-  margin-top: 0;
-}
+h1, h2, h3, h4, p { margin-top: 0; }
+h1, h2 { font-family: "DM Serif Display", serif; font-weight: 400; letter-spacing: -.7px; }
+h1 { margin: 8px 0 0; font-size: clamp(30px, 4vw, 52px); line-height: 1; }
+h2 { margin-bottom: 0; font-size: 27px; line-height: 1.1; }
+h3 { margin-bottom: 7px; font-size: 15px; }
+p  { line-height: 1.6; }
 
-h1,
-h2 {
-  font-family: "DM Serif Display", serif;
-  font-weight: 400;
-  letter-spacing: -.7px;
-}
+.muted { color: var(--muted); }
+.small-text { font-size: 11px; }
 
-h1 {
-  margin: 8px 0 0;
-  font-size: clamp(34px, 4vw, 52px);
-  line-height: 1;
-}
-
-h2 {
-  margin-bottom: 0;
-  font-size: 27px;
-  line-height: 1.1;
-}
-
-h3 {
-  margin-bottom: 7px;
-  font-size: 15px;
-}
-
-p {
-  line-height: 1.6;
-}
-
-.muted {
-  color: var(--muted);
-}
-
-.small-text {
-  font-size: 11px;
-}
-
-.grid {
-  display: grid;
-  gap: 17px;
-}
-
-.dashboard-hero-grid {
-  grid-template-columns: minmax(0, 1.35fr) minmax(210px, .7fr) minmax(210px, .7fr);
-}
+.grid { display: grid; gap: 17px; }
+.dashboard-hero-grid { grid-template-columns: minmax(0,1.35fr) minmax(210px,.7fr) minmax(210px,.7fr); }
 
 .card {
-  border: 1px solid rgba(222, 231, 221, .95);
+  border: 1px solid rgba(222,231,221,.95);
   border-radius: var(--radius-md);
-  background: rgba(255, 254, 249, .83);
+  background: rgba(255,254,249,.83);
   box-shadow: var(--shadow-sm);
 }
-
-.card-padding {
-  padding: 22px;
-}
+.card-padding { padding: 22px; }
 
 .hero-card {
   position: relative;
@@ -525,130 +417,55 @@ p {
   padding: 27px;
   border: 0;
   background:
-    linear-gradient(122deg, rgba(28, 70, 48, .98), rgba(71, 132, 90, .91)),
+    linear-gradient(122deg, rgba(28,70,48,.98), rgba(71,132,90,.91)),
     repeating-linear-gradient(45deg, transparent, transparent 10px, rgba(255,255,255,.05) 11px);
   color: white;
   box-shadow: var(--shadow-md);
 }
-
 .hero-card::before {
   content: "";
   position: absolute;
-  width: 250px;
-  height: 250px;
-  right: -82px;
-  top: -100px;
+  width: 250px; height: 250px;
+  right: -82px; top: -100px;
   border: 1px solid rgba(255,255,255,.22);
   border-radius: 50%;
-  box-shadow:
-    0 0 0 22px rgba(255,255,255,.05),
-    0 0 0 46px rgba(255,255,255,.04),
-    0 0 0 70px rgba(255,255,255,.03);
+  box-shadow: 0 0 0 22px rgba(255,255,255,.05), 0 0 0 46px rgba(255,255,255,.04), 0 0 0 70px rgba(255,255,255,.03);
 }
-
 .hero-card::after {
   content: "✦";
   position: absolute;
-  right: 48px;
-  bottom: 45px;
+  right: 48px; bottom: 45px;
   color: rgba(255,255,255,.28);
   font-size: 58px;
 }
-
-.hero-card .kicker {
-  color: var(--lime);
-}
-
+.hero-card .kicker { color: var(--lime); }
 .hero-card h2 {
-  position: relative;
-  z-index: 1;
+  position: relative; z-index: 1;
   max-width: 440px;
   margin: 12px 0 11px;
-  font-size: clamp(27px, 3vw, 39px);
+  font-size: clamp(22px, 3vw, 39px);
   line-height: 1;
 }
-
 .hero-card p {
-  position: relative;
-  z-index: 1;
+  position: relative; z-index: 1;
   max-width: 445px;
   margin-bottom: 20px;
   color: #d8ead9;
   font-size: 13px;
 }
+.hero-card .primary-button { position: relative; z-index: 1; border: 0; background: white; color: var(--forest); }
 
-.hero-card .primary-button {
-  position: relative;
-  z-index: 1;
-  border: 0;
-  background: white;
-  color: var(--forest);
-}
+.stat-card { min-height: 255px; padding: 22px; display: flex; flex-direction: column; justify-content: space-between; }
+.stat-top { display: flex; justify-content: space-between; color: var(--muted); font-size: 11px; font-weight: 700; }
+.stat-value { margin-top: 22px; font-family: "DM Serif Display", serif; font-size: 48px; line-height: .95; }
+.stat-value span { color: var(--muted); font-family: "DM Sans", sans-serif; font-size: 14px; font-weight: 500; }
 
-.stat-card {
-  min-height: 255px;
-  padding: 22px;
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-}
-
-.stat-top {
-  display: flex;
-  justify-content: space-between;
-  color: var(--muted);
-  font-size: 11px;
-  font-weight: 700;
-}
-
-.stat-value {
-  margin-top: 22px;
-  font-family: "DM Serif Display", serif;
-  font-size: 48px;
-  line-height: .95;
-}
-
-.stat-value span {
-  color: var(--muted);
-  font-family: "DM Sans", sans-serif;
-  font-size: 14px;
-  font-weight: 500;
-}
-
-.progress-track {
-  height: 8px;
-  overflow: hidden;
-  border-radius: 99px;
-  background: #e8eee7;
-}
-
-.progress-track.large {
-  height: 10px;
-}
-
-.progress-fill {
-  display: block;
-  height: 100%;
-  border-radius: inherit;
-  background: var(--forest-2);
-  transition: width .6s ease;
-}
-
-.progress-fill.gold {
-  background: var(--gold);
-}
-
-.progress-fill.orange {
-  background: var(--orange);
-}
-
-.progress-label {
-  display: flex;
-  justify-content: space-between;
-  margin-top: 9px;
-  color: var(--muted);
-  font-size: 11px;
-}
+.progress-track { height: 8px; overflow: hidden; border-radius: 99px; background: #e8eee7; }
+.progress-track.large { height: 10px; }
+.progress-fill { display: block; height: 100%; border-radius: inherit; background: var(--forest-2); transition: width .6s ease; }
+.progress-fill.gold   { background: var(--gold); }
+.progress-fill.orange { background: var(--orange); }
+.progress-label { display: flex; justify-content: space-between; margin-top: 9px; color: var(--muted); font-size: 11px; }
 
 .section-row {
   display: flex;
@@ -657,38 +474,20 @@ p {
   gap: 20px;
   margin: 37px 0 14px;
 }
+.section-row h2 { font-size: 25px; }
 
-.section-row h2 {
-  font-size: 25px;
-}
+.library-grid { grid-template-columns: repeat(3, minmax(0,1fr)); }
 
-.library-grid {
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-}
-
-.book-card {
-  padding: 18px;
-  transition: .2s ease;
-}
-
-.book-card:hover {
-  transform: translateY(-3px);
-  box-shadow: var(--shadow-md);
-}
-
-.book-main {
-  display: flex;
-  align-items: center;
-  gap: 14px;
-}
+.book-card { padding: 18px; transition: .2s ease; }
+.book-card:hover { transform: translateY(-3px); box-shadow: var(--shadow-md); }
+.book-main { display: flex; align-items: center; gap: 14px; }
 
 .book-cover {
   position: relative;
   display: flex;
   align-items: flex-end;
   flex: 0 0 auto;
-  width: 67px;
-  height: 91px;
+  width: 67px; height: 91px;
   padding: 10px;
   overflow: hidden;
   border-radius: 8px 10px 10px 8px;
@@ -698,51 +497,20 @@ p {
   line-height: 1.05;
   box-shadow: 5px 7px 13px rgba(0,0,0,.16);
 }
-
 .book-cover::after {
   content: "";
-  position: absolute;
-  inset: 0;
+  position: absolute; inset: 0;
   background: linear-gradient(115deg, rgba(255,255,255,.15), transparent 42%);
 }
+.cover-green  { background: linear-gradient(145deg, #22533a, #8bbd8d); }
+.cover-orange { background: linear-gradient(145deg, #a95737, #edbd82); }
+.cover-blue   { background: linear-gradient(145deg, #436d7e, #b1d1d6); }
+.cover-purple { background: linear-gradient(145deg, #65517e, #c8b6d4); }
 
-.cover-green {
-  background: linear-gradient(145deg, #22533a, #8bbd8d);
-}
-
-.cover-orange {
-  background: linear-gradient(145deg, #a95737, #edbd82);
-}
-
-.cover-blue {
-  background: linear-gradient(145deg, #436d7e, #b1d1d6);
-}
-
-.cover-purple {
-  background: linear-gradient(145deg, #65517e, #c8b6d4);
-}
-
-.book-title {
-  margin-bottom: 4px;
-  font-size: 14px;
-  font-weight: 800;
-}
-
-.book-author {
-  color: var(--muted);
-  font-size: 11px;
-}
-
-.book-progress {
-  margin-top: 15px;
-}
-
-.book-footer {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-top: 12px;
-}
+.book-title  { margin-bottom: 4px; font-size: 14px; font-weight: 800; }
+.book-author { color: var(--muted); font-size: 11px; }
+.book-progress { margin-top: 15px; }
+.book-footer { display: flex; align-items: center; justify-content: space-between; margin-top: 12px; }
 
 .tag {
   display: inline-flex;
@@ -755,18 +523,13 @@ p {
   font-weight: 800;
 }
 
-.activity-grid {
-  grid-template-columns: minmax(0, 1.2fr) minmax(290px, .8fr);
-}
+.activity-grid { grid-template-columns: minmax(0,1.2fr) minmax(290px,.8fr); }
 
 .rhythm-card {
   min-height: 220px;
   padding: 23px;
-  background:
-    radial-gradient(circle at 98% 0, rgba(242,204,105,.34), transparent 15rem),
-    #fff8e3;
+  background: radial-gradient(circle at 98% 0, rgba(242,204,105,.34), transparent 15rem), #fff8e3;
 }
-
 .rhythm-card h3 {
   max-width: 470px;
   margin-top: 10px;
@@ -783,7 +546,6 @@ p {
   height: 90px;
   margin-top: 20px;
 }
-
 .week-column {
   display: flex;
   flex: 1;
@@ -794,45 +556,20 @@ p {
   color: var(--muted);
   font-size: 10px;
 }
+.week-bar { width: 100%; max-width: 27px; min-height: 10px; border-radius: 8px 8px 4px 4px; background: var(--forest-2); }
+.week-bar.today { background: var(--orange); }
 
-.week-bar {
-  width: 100%;
-  max-width: 27px;
-  min-height: 10px;
-  border-radius: 8px 8px 4px 4px;
-  background: var(--forest-2);
-}
-
-.week-bar.today {
-  background: var(--orange);
-}
-
-.reward-card {
-  padding: 23px;
-}
-
-.badge-row {
-  display: flex;
-  gap: 10px;
-  flex-wrap: wrap;
-  margin-top: 19px;
-}
-
+.reward-card { padding: 23px; }
+.badge-row { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 19px; }
 .reward-badge {
-  display: grid;
-  place-items: center;
-  width: 53px;
-  height: 53px;
+  display: grid; place-items: center;
+  width: 53px; height: 53px;
   border: 1px solid rgba(36,79,58,.10);
   border-radius: 17px;
   background: var(--sage);
   font-size: 23px;
 }
-
-.reward-badge.locked {
-  opacity: .35;
-  filter: grayscale(1);
-}
+.reward-badge.locked { opacity: .35; filter: grayscale(1); }
 
 .streak-strip {
   display: flex;
@@ -843,19 +580,9 @@ p {
   border-radius: 14px;
   background: var(--sage-2);
 }
+.streak-number { font-family: "DM Serif Display", serif; font-size: 32px; line-height: 1; }
 
-.streak-number {
-  font-family: "DM Serif Display", serif;
-  font-size: 32px;
-  line-height: 1;
-}
-
-.quick-actions {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 12px;
-}
-
+.quick-actions { display: grid; grid-template-columns: repeat(4,1fr); gap: 12px; }
 .quick-action {
   display: flex;
   min-height: 94px;
@@ -869,36 +596,12 @@ p {
   text-align: left;
   transition: .2s ease;
 }
+.quick-action:hover { border-color: var(--forest-2); background: white; transform: translateY(-2px); }
+.quick-action strong { font-size: 12px; }
+.quick-action span   { color: var(--forest-2); font-size: 20px; }
 
-.quick-action:hover {
-  border-color: var(--forest-2);
-  background: white;
-  transform: translateY(-2px);
-}
-
-.quick-action strong {
-  font-size: 12px;
-}
-
-.quick-action span {
-  color: var(--forest-2);
-  font-size: 20px;
-}
-
-.reader-layout {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) 315px;
-  gap: 18px;
-}
-
-.reader-toolbar {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  flex-wrap: wrap;
-  margin-bottom: 13px;
-}
-
+.reader-layout { display: grid; grid-template-columns: minmax(0,1fr) 315px; gap: 18px; }
+.reader-toolbar { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin-bottom: 13px; }
 .reader-stage {
   min-height: 720px;
   padding: 25px;
@@ -921,7 +624,6 @@ p {
   font-family: Georgia, serif;
   line-height: 1.85;
 }
-
 .document-meta {
   margin-bottom: 15px;
   color: var(--forest-2);
@@ -930,23 +632,9 @@ p {
   letter-spacing: 1.4px;
   text-transform: uppercase;
 }
-
-.document h2 {
-  margin-bottom: 23px;
-  color: var(--ink);
-  font-size: 38px;
-}
-
-.document p {
-  font-size: 16px;
-}
-
-.document .highlight {
-  padding: 2px 4px;
-  border-radius: 3px;
-  background: #f8e19b;
-}
-
+.document h2 { margin-bottom: 23px; color: var(--ink); font-size: 38px; }
+.document p  { font-size: 16px; }
+.document .highlight { padding: 2px 4px; border-radius: 3px; background: #f8e19b; }
 .document-footer {
   display: flex;
   align-items: center;
@@ -958,13 +646,10 @@ p {
   color: var(--muted);
   font-family: "DM Sans", sans-serif;
   font-size: 11px;
+  flex-wrap: wrap;
 }
 
-.reader-sidebar {
-  display: grid;
-  align-content: start;
-  gap: 14px;
-}
+.reader-sidebar { display: grid; align-content: start; gap: 14px; }
 
 .timer-card {
   padding: 23px;
@@ -973,73 +658,32 @@ p {
   color: white;
   box-shadow: var(--shadow-md);
 }
-
-.timer-card .kicker {
-  color: var(--lime);
-}
-
-.timer-display {
-  margin: 17px 0 4px;
-  font-family: "Space Mono", monospace;
-  font-size: 42px;
-  font-weight: 700;
-  letter-spacing: -2px;
-}
-
-.timer-status {
-  color: #cce4d0;
-  font-size: 11px;
-}
-
+.timer-card .kicker { color: var(--lime); }
+.timer-display { margin: 17px 0 4px; font-family: "Space Mono", monospace; font-size: 42px; font-weight: 700; letter-spacing: -2px; }
+.timer-status { color: #cce4d0; font-size: 11px; }
 .timer-card button {
   width: 100%;
   margin-top: 17px;
-  border: 0;
-  border-radius: 11px;
+  border: 0; border-radius: 11px;
   padding: 11px;
   background: white;
   color: var(--forest);
-  font-size: 12px;
-  font-weight: 800;
+  font-size: 12px; font-weight: 800;
 }
 
-.side-panel {
-  padding: 19px;
-}
-
-.panel-heading {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 10px;
-  margin-bottom: 14px;
-}
-
-.panel-heading h3 {
-  margin: 0;
-}
-
+.side-panel { padding: 19px; }
+.panel-heading { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 14px; }
+.panel-heading h3 { margin: 0; }
 .panel-count {
-  display: grid;
-  place-items: center;
-  min-width: 22px;
-  height: 22px;
+  display: grid; place-items: center;
+  min-width: 22px; height: 22px;
   padding: 0 6px;
   border-radius: 50%;
   background: var(--sage);
   color: var(--forest);
-  font-size: 10px;
-  font-weight: 800;
+  font-size: 10px; font-weight: 800;
 }
-
-.note-list {
-  display: grid;
-  gap: 9px;
-  max-height: 180px;
-  overflow-y: auto;
-  margin-bottom: 12px;
-}
-
+.note-list { display: grid; gap: 9px; max-height: 180px; overflow-y: auto; margin-bottom: 12px; }
 .note {
   padding: 11px 12px;
   border-left: 3px solid var(--gold);
@@ -1050,9 +694,7 @@ p {
   line-height: 1.5;
 }
 
-textarea,
-input,
-select {
+textarea, input, select {
   width: 100%;
   border: 1px solid var(--line);
   border-radius: 11px;
@@ -1062,15 +704,8 @@ select {
   color: var(--ink);
   font-size: 12px;
 }
-
-textarea {
-  min-height: 80px;
-  resize: vertical;
-}
-
-.full-width {
-  width: 100%;
-}
+textarea { min-height: 80px; resize: vertical; }
+.full-width { width: 100%; }
 
 .music-control {
   display: flex;
@@ -1081,151 +716,48 @@ textarea {
   border-radius: 13px;
   background: var(--sage-2);
 }
-
-.music-control strong {
-  display: block;
-  font-size: 11px;
-}
-
-.music-control small {
-  display: block;
-  margin-top: 3px;
-  color: var(--muted);
-  font-size: 10px;
-}
+.music-control strong { display: block; font-size: 11px; }
+.music-control small  { display: block; margin-top: 3px; color: var(--muted); font-size: 10px; }
 
 .toggle {
   position: relative;
-  width: 38px;
-  height: 22px;
-  border: 0;
-  border-radius: 99px;
+  width: 38px; height: 22px;
+  flex: 0 0 auto;
+  border: 0; border-radius: 99px;
   background: #ccd8cd;
 }
-
 .toggle::after {
   content: "";
   position: absolute;
-  top: 3px;
-  left: 3px;
-  width: 16px;
-  height: 16px;
+  top: 3px; left: 3px;
+  width: 16px; height: 16px;
   border-radius: 50%;
   background: white;
   transition: .2s ease;
 }
+.toggle.on { background: var(--forest-2); }
+.toggle.on::after { left: 19px; }
 
-.toggle.on {
-  background: var(--forest-2);
-}
+.room-grid { grid-template-columns: minmax(0,1.2fr) minmax(280px,.8fr); }
+.room-list { display: grid; gap: 11px; }
+.room-card { display: flex; align-items: center; gap: 14px; padding: 17px; flex-wrap: wrap; }
+.room-icon { display: grid; place-items: center; flex: 0 0 auto; width: 52px; height: 52px; border-radius: 16px; background: var(--blue); font-size: 22px; }
+.room-details { flex: 1; min-width: 0; }
+.room-details h3 { margin-bottom: 4px; }
+.room-details p  { margin: 0; color: var(--muted); font-size: 11px; }
+.online-dot { display: inline-block; width: 7px; height: 7px; margin-right: 5px; border-radius: 50%; background: #68b47a; }
 
-.toggle.on::after {
-  left: 19px;
-}
+.room-members { display: flex; margin-top: 12px; }
+.room-members .mini-avatar { margin-left: -6px; border: 2px solid var(--paper); }
+.room-members .mini-avatar:first-child { margin-left: 0; }
+.mini-avatar { display: grid; place-items: center; width: 26px; height: 26px; border-radius: 50%; background: #dc9877; color: white; font-size: 8px; font-weight: 800; }
+.mini-avatar.blue   { background: #668da2; }
+.mini-avatar.green  { background: #5d9b78; }
+.mini-avatar.purple { background: #8d72a9; }
 
-.room-grid {
-  grid-template-columns: minmax(0, 1.2fr) minmax(280px, .8fr);
-}
-
-.room-list {
-  display: grid;
-  gap: 11px;
-}
-
-.room-card {
-  display: flex;
-  align-items: center;
-  gap: 14px;
-  padding: 17px;
-}
-
-.room-icon {
-  display: grid;
-  place-items: center;
-  flex: 0 0 auto;
-  width: 52px;
-  height: 52px;
-  border-radius: 16px;
-  background: var(--blue);
-  font-size: 22px;
-}
-
-.room-details {
-  flex: 1;
-}
-
-.room-details h3 {
-  margin-bottom: 4px;
-}
-
-.room-details p {
-  margin: 0;
-  color: var(--muted);
-  font-size: 11px;
-}
-
-.online-dot {
-  display: inline-block;
-  width: 7px;
-  height: 7px;
-  margin-right: 5px;
-  border-radius: 50%;
-  background: #68b47a;
-}
-
-.room-members {
-  display: flex;
-  margin-top: 12px;
-}
-
-.room-members .mini-avatar {
-  margin-left: -6px;
-  border: 2px solid var(--paper);
-}
-
-.room-members .mini-avatar:first-child {
-  margin-left: 0;
-}
-
-.mini-avatar {
-  display: grid;
-  place-items: center;
-  width: 26px;
-  height: 26px;
-  border-radius: 50%;
-  background: #dc9877;
-  color: white;
-  font-size: 8px;
-  font-weight: 800;
-}
-
-.mini-avatar.blue {
-  background: #668da2;
-}
-
-.mini-avatar.green {
-  background: #5d9b78;
-}
-
-.mini-avatar.purple {
-  background: #8d72a9;
-}
-
-.invite-card {
-  padding: 23px;
-}
-
-.invite-link {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  margin: 18px 0 10px;
-}
-
-.invite-link input {
-  font-family: "Space Mono", monospace;
-  font-size: 10px;
-}
+.invite-card { padding: 23px; }
+.invite-link { display: flex; align-items: center; gap: 6px; margin: 18px 0 10px; }
+.invite-link input { font-family: "Space Mono", monospace; font-size: 10px; }
 
 .room-member-row {
   display: flex;
@@ -1235,36 +767,14 @@ textarea {
   border-bottom: 1px solid var(--line);
   font-size: 12px;
 }
+.member-info { display: flex; align-items: center; gap: 9px; }
 
-.member-info {
-  display: flex;
-  align-items: center;
-  gap: 9px;
-}
+.analytics-grid { grid-template-columns: repeat(3, minmax(0,1fr)); }
+.analytics-card { padding: 21px; }
+.analytics-number { margin: 16px 0 7px; font-family: "DM Serif Display", serif; font-size: 42px; line-height: 1; }
 
-.analytics-grid {
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-}
-
-.analytics-card {
-  padding: 21px;
-}
-
-.analytics-number {
-  margin: 16px 0 7px;
-  font-family: "DM Serif Display", serif;
-  font-size: 42px;
-  line-height: 1;
-}
-
-.insight-grid {
-  grid-template-columns: minmax(0, 1fr) minmax(280px, .8fr);
-}
-
-.chart-card {
-  padding: 24px;
-}
-
+.insight-grid { grid-template-columns: minmax(0,1fr) minmax(280px,.8fr); }
+.chart-card { padding: 24px; }
 .bar-chart {
   display: flex;
   align-items: flex-end;
@@ -1275,7 +785,6 @@ textarea {
   padding: 0 10px 25px;
   border-bottom: 1px solid var(--line);
 }
-
 .chart-column {
   display: flex;
   height: 100%;
@@ -1287,75 +796,36 @@ textarea {
   color: var(--muted);
   font-size: 10px;
 }
-
-.chart-bar {
-  width: min(36px, 80%);
-  min-height: 8px;
-  border-radius: 8px 8px 3px 3px;
-  background: var(--forest-2);
-}
-
-.chart-bar.highlighted {
-  background: var(--orange);
-}
+.chart-bar { width: min(36px,80%); min-height: 8px; border-radius: 8px 8px 3px 3px; background: var(--forest-2); }
+.chart-bar.highlighted { background: var(--orange); }
 
 .insight-card {
   padding: 24px;
-  background:
-    radial-gradient(circle at 100% 0, rgba(200,185,223,.38), transparent 16rem),
-    #f6f0ff;
+  background: radial-gradient(circle at 100% 0, rgba(200,185,223,.38), transparent 16rem), #f6f0ff;
 }
+.insight-quote { margin: 24px 0; color: var(--ink); font-family: "DM Serif Display", serif; font-size: 25px; line-height: 1.18; }
 
-.insight-quote {
-  margin: 24px 0;
-  color: var(--ink);
-  font-family: "DM Serif Display", serif;
-  font-size: 25px;
-  line-height: 1.18;
-}
-
-.goal-card {
-  padding: 23px;
-}
-
-.goal-row {
-  display: grid;
-  grid-template-columns: 1fr 75px;
-  align-items: center;
-  gap: 15px;
-  margin-top: 20px;
-}
-
-.goal-row label {
-  display: block;
-  margin-bottom: 8px;
-  font-size: 12px;
-  font-weight: 800;
-}
-
-.goal-row input {
-  text-align: center;
-}
+.goal-card { padding: 23px; }
+.goal-row { display: grid; grid-template-columns: 1fr 75px; align-items: center; gap: 15px; margin-top: 20px; }
+.goal-row label { display: block; margin-bottom: 8px; font-size: 12px; font-weight: 800; }
+.goal-row input { text-align: center; }
 
 .modal-backdrop {
-  position: fixed;
-  inset: 0;
+  position: fixed; inset: 0;
   z-index: 50;
   display: none;
   place-items: center;
-  padding: 20px;
-  background: rgba(14, 29, 20, .45);
+  padding: 16px;
+  background: rgba(14,29,20,.45);
   backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
 }
-
-.modal-backdrop.open {
-  display: grid;
-}
-
+.modal-backdrop.open { display: grid; }
 .modal {
   width: min(100%, 525px);
-  max-height: 90vh;
+  max-height: 92vh;
   overflow-y: auto;
+  overscroll-behavior: contain;
   padding: 26px;
   border: 1px solid rgba(255,255,255,.40);
   border-radius: 25px;
@@ -1363,110 +833,34 @@ textarea {
   box-shadow: var(--shadow-lg);
   animation: modal-in .25s ease both;
 }
-
 @keyframes modal-in {
-  from {
-    opacity: 0;
-    transform: translateY(15px) scale(.98);
-  }
-  to {
-    opacity: 1;
-    transform: none;
-  }
+  from { opacity: 0; transform: translateY(15px) scale(.98); }
+  to   { opacity: 1; transform: none; }
 }
-
-.modal-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 15px;
-  margin-bottom: 15px;
-}
-
-.modal-header h2 {
-  font-size: 27px;
-}
-
+.modal-header { display: flex; align-items: center; justify-content: space-between; gap: 15px; margin-bottom: 15px; }
+.modal-header h2 { font-size: 27px; }
 .close-button {
-  display: grid;
-  place-items: center;
-  width: 32px;
-  height: 32px;
-  border: 0;
-  border-radius: 50%;
+  display: grid; place-items: center;
+  width: 32px; height: 32px;
+  border: 0; border-radius: 50%;
   background: #edf2eb;
   color: var(--muted);
   font-size: 18px;
+  flex: 0 0 auto;
 }
-
-.form-stack {
-  display: grid;
-  gap: 11px;
-}
-
-.form-label {
-  display: grid;
-  gap: 6px;
-  color: var(--muted);
-  font-size: 11px;
-  font-weight: 800;
-}
-
-.form-row {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 10px;
-}
-
-.ai-answer {
-  display: none;
-  margin-top: 13px;
-  padding: 13px;
-  border-left: 3px solid var(--forest-2);
-  border-radius: 10px;
-  background: var(--sage-2);
-  color: var(--ink-soft);
-  font-size: 12px;
-  line-height: 1.6;
-}
-
-.quiz-question {
-  margin: 18px 0 14px;
-  font-size: 15px;
-  font-weight: 800;
-  line-height: 1.5;
-}
-
-.quiz-option {
-  display: block;
-  width: 100%;
-  margin: 8px 0;
-  padding: 13px;
-  border: 1px solid var(--line);
-  border-radius: 12px;
-  background: #fbfcf8;
-  color: var(--ink);
-  text-align: left;
-  font-size: 12px;
-  transition: .2s ease;
-}
-
-.quiz-option:hover {
-  border-color: var(--forest-2);
-  background: var(--sage-2);
-}
-
-.quiz-result {
-  min-height: 20px;
-  margin-top: 13px;
-  font-size: 12px;
-  font-weight: 800;
-}
+.form-stack { display: grid; gap: 11px; }
+.form-label { display: grid; gap: 6px; color: var(--muted); font-size: 11px; font-weight: 800; }
+.form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.ai-answer { display: none; margin-top: 13px; padding: 13px; border-left: 3px solid var(--forest-2); border-radius: 10px; background: var(--sage-2); color: var(--ink-soft); font-size: 12px; line-height: 1.6; }
+.quiz-question { margin: 18px 0 14px; font-size: 15px; font-weight: 800; line-height: 1.5; }
+.quiz-option { display: block; width: 100%; margin: 8px 0; padding: 13px; border: 1px solid var(--line); border-radius: 12px; background: #fbfcf8; color: var(--ink); text-align: left; font-size: 12px; transition: .2s ease; }
+.quiz-option:hover { border-color: var(--forest-2); background: var(--sage-2); }
+.quiz-result { min-height: 20px; margin-top: 13px; font-size: 12px; font-weight: 800; }
 
 .toast {
   position: fixed;
-  right: 25px;
-  bottom: 25px;
+  right: 20px;
+  bottom: calc(20px + var(--bottom-nav-height));
   z-index: 100;
   display: none;
   max-width: 320px;
@@ -1474,189 +868,224 @@ textarea {
   border-radius: 13px;
   background: var(--ink);
   color: white;
-  font-size: 12px;
-  font-weight: 700;
+  font-size: 12px; font-weight: 700;
   box-shadow: var(--shadow-lg);
 }
-
-.toast.show {
-  display: block;
-  animation: toast-in 3.5s ease forwards;
-}
-
+.toast.show { display: block; animation: toast-in 3.5s ease forwards; }
 @keyframes toast-in {
-  0% {
-    opacity: 0;
-    transform: translateY(12px);
-  }
-  10%, 80% {
-    opacity: 1;
-    transform: none;
-  }
-  100% {
-    opacity: 0;
-    transform: translateY(8px);
-  }
+  0%      { opacity: 0; transform: translateY(12px); }
+  10%, 80%{ opacity: 1; transform: none; }
+  100%    { opacity: 0; transform: translateY(8px); }
 }
 
-.mobile-menu {
+.mobile-menu { display: none; }
+.empty-state { padding: 32px; border: 1px dashed #c9d8cb; border-radius: 18px; background: var(--sage-2); color: var(--muted); text-align: center; }
+
+/* BOTTOM NAV */
+.bottom-nav {
   display: none;
+  position: fixed;
+  bottom: 0; left: 0; right: 0;
+  z-index: 8;
+  background: rgba(255,254,249,.96);
+  border-top: 1px solid var(--line);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  box-shadow: 0 -4px 20px rgba(24,51,35,.06);
+  padding-bottom: env(safe-area-inset-bottom, 0px);
 }
-
-.empty-state {
-  padding: 32px;
-  border: 1px dashed #c9d8cb;
-  border-radius: 18px;
-  background: var(--sage-2);
+.bottom-nav-inner { display: grid; grid-template-columns: repeat(5,1fr); }
+.bottom-nav-btn {
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  gap: 3px;
+  min-height: 54px;
+  padding: 6px 2px;
+  border: 0; background: transparent;
   color: var(--muted);
-  text-align: center;
+  font-size: 9px; font-weight: 700;
+  letter-spacing: .3px; text-transform: uppercase;
+  font-family: "Space Mono", monospace;
+  transition: color .2s ease;
 }
+.bottom-nav-btn .bn-icon { font-size: 19px; transition: transform .2s ease; }
+.bottom-nav-btn.active { color: var(--forest); }
+.bottom-nav-btn.active .bn-icon { transform: translateY(-2px); }
 
+/* ═══════════════════════════════
+   RESPONSIVE BREAKPOINTS
+═══════════════════════════════ */
+
+/* Tablet landscape 900-1180 */
 @media (max-width: 1180px) {
-  :root {
-    --sidebar-width: 225px;
-  }
-
-  .main {
-    padding-right: 25px;
-    padding-left: 25px;
-  }
-
-  .dashboard-hero-grid,
-  .reader-layout,
-  .room-grid,
-  .insight-grid {
-    grid-template-columns: 1fr;
-  }
-
-  .reader-sidebar {
-    grid-template-columns: repeat(3, 1fr);
-    align-items: start;
-  }
+  :root { --sidebar-width: 225px; }
+  .main { padding-right: 28px; padding-left: 28px; }
+  .topbar { margin: 0 -28px; padding: 0 28px; }
+  .dashboard-hero-grid { grid-template-columns: 1fr 1fr; }
+  .dashboard-hero-grid > .hero-card { grid-column: 1 / -1; }
+  .reader-layout, .room-grid, .insight-grid { grid-template-columns: 1fr; }
+  .reader-sidebar { grid-template-columns: repeat(2,1fr); align-items: start; }
+  .reader-sidebar > .timer-card { grid-column: 1 / -1; }
 }
 
+/* Tablet portrait 600-900 */
+@media (max-width: 900px) {
+  .activity-grid { grid-template-columns: 1fr; }
+  .library-grid { grid-template-columns: repeat(2,1fr); }
+  .reader-sidebar { grid-template-columns: repeat(2,1fr); }
+  .reader-sidebar > .timer-card { grid-column: 1 / -1; }
+  .bar-chart { gap: 7px; }
+}
+
+/* Mobile < 780px */
 @media (max-width: 780px) {
   :root {
     --sidebar-width: 0px;
+    --bottom-nav-height: calc(54px + env(safe-area-inset-bottom, 0px));
   }
 
   .sidebar {
-    display: none;
+    width: min(290px, 85vw);
+    transform: translateX(-100%);
+    transition: transform .3s cubic-bezier(.4,0,.2,1);
+    box-shadow: none;
+    padding-top: 20px;
   }
+  .sidebar.open { transform: translateX(0); box-shadow: var(--shadow-lg); }
+  .sidebar-close { display: flex; }
+  .brand { margin-top: 8px; }
 
   .main {
-    width: 100%;
-    margin-left: 0;
-    padding: 0 16px 35px;
+    width: 100%; margin-left: 0;
+    padding: 0 16px;
+    padding-bottom: calc(var(--bottom-nav-height) + 24px);
   }
+  .topbar { position: sticky; top: 0; min-height: 62px; margin: 0 -16px; padding: 0 14px; z-index: 7; }
 
-  .topbar {
-    min-height: 68px;
-  }
-
-  .breadcrumb {
-    display: none;
-  }
-
-  .search-box {
-    display: none;
-  }
-
+  .topbar-brand { display: flex; }
+  .breadcrumb { display: none; }
+  .search-box { display: none; }
   .mobile-menu {
-    display: grid;
-    place-items: center;
-    width: 37px;
-    height: 37px;
-    border: 1px solid var(--line);
-    border-radius: 11px;
-    background: white;
+    display: grid; place-items: center;
+    width: 40px; height: 40px;
+    border: 1px solid var(--line); border-radius: 12px;
+    background: white; font-size: 16px; flex: 0 0 auto;
+  }
+  .topbar-actions { gap: 6px; }
+  .topbar-actions .primary-button { display: none; }
+  .bottom-nav { display: block; }
+
+  .page { padding-top: 22px; }
+  .page-heading { align-items: flex-start; flex-direction: column; }
+
+  .dashboard-hero-grid { grid-template-columns: 1fr; }
+  .dashboard-hero-grid > .hero-card { grid-column: unset; }
+  .library-grid { grid-template-columns: repeat(2,1fr); }
+  .analytics-grid { grid-template-columns: repeat(2,1fr); }
+  .quick-actions { grid-template-columns: repeat(2,1fr); }
+  .room-grid { grid-template-columns: 1fr; }
+  .reader-layout { grid-template-columns: 1fr; }
+  .reader-sidebar { grid-template-columns: repeat(2,1fr); }
+  .reader-sidebar > .timer-card { grid-column: 1 / -1; }
+  .activity-grid { grid-template-columns: 1fr; }
+
+  .reader-stage { padding: 12px; min-height: auto; border-radius: var(--radius-md); }
+  .document { min-height: unset; padding: 32px 22px; }
+  .document h2 { font-size: 28px; }
+  .document p  { font-size: 15px; }
+
+  .reader-toolbar { gap: 6px; }
+  .reader-toolbar button {
+    flex: 1; min-width: 0;
+    font-size: 11px; padding: 10px 8px;
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
   }
 
-  .topbar-actions {
-    gap: 6px;
-  }
+  .stat-card { min-height: unset; padding: 20px; }
+  .stat-value { font-size: 40px; }
+  .hero-card { min-height: 200px; padding: 22px; }
+  .hero-card::after { right: 20px; bottom: 20px; font-size: 44px; }
+  .timer-display { font-size: 38px; }
+  .room-card { align-items: flex-start; }
+  .room-card > button { flex: 0 0 auto; align-self: center; }
 
-  .topbar-actions .primary-button {
-    display: none;
-  }
+  .section-row { flex-direction: column; align-items: flex-start; gap: 8px; margin: 28px 0 14px; }
+  .primary-button, .secondary-button { min-height: 44px; }
+  .quick-action { min-height: 90px; }
 
-  .page {
-    padding-top: 25px;
-  }
+  .week-chart { gap: 6px; }
+  .week-bar { max-width: 22px; }
+  .analytics-number { font-size: 36px; }
 
-  .page-heading {
-    align-items: flex-start;
-    flex-direction: column;
-  }
-
-  .library-grid,
-  .analytics-grid,
-  .quick-actions {
-    grid-template-columns: 1fr 1fr;
-  }
-
-  .reader-sidebar {
-    grid-template-columns: 1fr;
-  }
-
-  .reader-stage {
-    padding: 10px;
-  }
-
-  .document {
-    min-height: 700px;
-    padding: 38px 24px;
-  }
-
-  .document h2 {
-    font-size: 30px;
-  }
-
-  .document p {
-    font-size: 15px;
-  }
+  .modal { padding: 20px; border-radius: 20px; max-height: 88vh; }
+  .modal-header h2 { font-size: 22px; }
+  .toast { right: 14px; left: 14px; max-width: none; text-align: center; }
 }
 
-@media (max-width: 490px) {
-  .library-grid,
-  .analytics-grid,
-  .quick-actions,
-  .form-row {
-    grid-template-columns: 1fr;
-  }
+/* Small phone < 480px */
+@media (max-width: 480px) {
+  .main { padding: 0 13px; padding-bottom: calc(var(--bottom-nav-height) + 20px); }
+  .topbar { margin: 0 -13px; padding: 0 11px; }
 
-  .hero-card {
-    min-height: 300px;
-  }
+  .library-grid, .analytics-grid, .quick-actions, .form-row { grid-template-columns: 1fr; }
+  .reader-sidebar { grid-template-columns: 1fr; }
+  .reader-sidebar > .timer-card { grid-column: unset; }
 
-  .section-row {
-    align-items: flex-start;
-    flex-direction: column;
-    gap: 9px;
-  }
+  .hero-card { min-height: 220px; }
+  .hero-card::after { display: none; }
 
-  .card-padding,
-  .stat-card,
-  .book-card,
-  .rhythm-card,
-  .reward-card,
-  .analytics-card,
-  .chart-card,
-  .insight-card,
-  .goal-card {
-    padding: 17px;
-  }
+  .card-padding, .stat-card, .book-card, .rhythm-card, .reward-card,
+  .analytics-card, .chart-card, .insight-card, .goal-card, .invite-card { padding: 15px; }
 
-  .reader-toolbar .secondary-button {
-    flex: 1;
-  }
+  .timer-display { font-size: 34px; letter-spacing: -1px; }
+  .document { padding: 24px 16px; }
+  .document h2 { font-size: 24px; }
+  .document p  { font-size: 14px; line-height: 1.7; }
+
+  .week-chart { gap: 4px; }
+  .week-bar { max-width: 16px; }
+  .week-column { font-size: 9px; }
+  .bar-chart { gap: 5px; padding: 0 0 20px; }
+
+  h1 { font-size: clamp(28px, 8vw, 38px); }
+  h2 { font-size: 22px; }
+  .rhythm-card h3 { font-size: 20px; }
+  .insight-quote { font-size: 20px; }
+  .stat-value { font-size: 36px; margin-top: 14px; }
+  .analytics-number { font-size: 32px; }
+
+  .goal-row { grid-template-columns: 1fr; }
+  .room-card { flex-wrap: wrap; }
+  .room-card > button { width: 100%; margin-top: 4px; }
+  .quick-action { min-height: 80px; }
+  .badge-row .reward-badge { width: 46px; height: 46px; font-size: 20px; }
+  .streak-number { font-size: 26px; }
+  .section-row { margin: 22px 0 12px; }
+  .modal { padding: 16px; border-radius: 18px; }
+  .bottom-nav-btn { font-size: 8px; min-height: 50px; }
+  .bottom-nav-btn .bn-icon { font-size: 17px; }
+  .invite-link { flex-direction: column; align-items: stretch; }
+  .invite-link input { font-size: 9px; }
+}
+
+/* Tiny phone < 360px */
+@media (max-width: 360px) {
+  .main { padding: 0 10px; padding-bottom: calc(var(--bottom-nav-height) + 16px); }
+  .topbar { margin: 0 -10px; padding: 0 10px; }
+  .topbar-brand .brand-name { font-size: 17px; }
+  .topbar-brand .brand-mark { width: 30px; height: 30px; font-size: 17px; }
+  .top-icon { width: 36px; height: 36px; }
+  .mobile-menu { width: 36px; height: 36px; }
 }
 </style>
 </head>
 
 <body>
+<div class="sidebar-overlay" id="sidebarOverlay" onclick="closeMobileNavigation()"></div>
+
 <div class="app-shell">
-  <aside class="sidebar">
+  <aside class="sidebar" id="mainSidebar">
+    <button class="sidebar-close" onclick="closeMobileNavigation()" aria-label="Close menu">×</button>
+
     <div class="brand">
       <div class="brand-mark">L</div>
       <div>
@@ -1667,43 +1096,14 @@ textarea {
 
     <nav class="navigation">
       <div class="nav-label">Workspace</div>
-
-      <button class="nav-item active" data-page="dashboard">
-        <span class="nav-icon">⌂</span>
-        <span>Overview</span>
-      </button>
-
-      <button class="nav-item" data-page="library">
-        <span class="nav-icon">▤</span>
-        <span>My library</span>
-      </button>
-
-      <button class="nav-item" data-page="reader">
-        <span class="nav-icon">◉</span>
-        <span>Reading room</span>
-      </button>
-
-      <button class="nav-item" data-page="rooms">
-        <span class="nav-icon">♧</span>
-        <span>Study circles</span>
-      </button>
-
+      <button class="nav-item active" data-page="dashboard"><span class="nav-icon">⌂</span><span>Overview</span></button>
+      <button class="nav-item" data-page="library"><span class="nav-icon">▤</span><span>My library</span></button>
+      <button class="nav-item" data-page="reader"><span class="nav-icon">◉</span><span>Reading room</span></button>
+      <button class="nav-item" data-page="rooms"><span class="nav-icon">♧</span><span>Study circles</span></button>
       <div class="nav-label">Reflect</div>
-
-      <button class="nav-item" data-page="analytics">
-        <span class="nav-icon">↗</span>
-        <span>Progress insights</span>
-      </button>
-
-      <button class="nav-item" data-page="rewards">
-        <span class="nav-icon">✦</span>
-        <span>Rewards</span>
-      </button>
-
-      <button class="nav-item" data-page="settings">
-        <span class="nav-icon">⚙</span>
-        <span>Preferences</span>
-      </button>
+      <button class="nav-item" data-page="analytics"><span class="nav-icon">↗</span><span>Progress insights</span></button>
+      <button class="nav-item" data-page="rewards"><span class="nav-icon">✦</span><span>Rewards</span></button>
+      <button class="nav-item" data-page="settings"><span class="nav-icon">⚙</span><span>Preferences</span></button>
     </nav>
 
     <div class="sidebar-bottom">
@@ -1712,7 +1112,6 @@ textarea {
         <strong>25 quiet minutes for yourself.</strong>
         <button class="ambient-button" onclick="openPage('reader')">Begin session →</button>
       </div>
-
       <div class="user-profile">
         <div class="avatar">AS</div>
         <div>
@@ -1725,22 +1124,22 @@ textarea {
 
   <main class="main">
     <header class="topbar">
+      <div class="topbar-brand">
+        <div class="brand-mark" style="width:34px;height:34px;border-radius:12px 12px 12px 3px;font-size:20px;">L</div>
+        <div class="brand-name" style="font-size:20px;">leafline</div>
+      </div>
       <div>
         <div class="breadcrumb">
-          <span>Wednesday</span>
-          <span>/</span>
+          <span>Wednesday</span><span>/</span>
           <b id="breadcrumbText">Overview</b>
         </div>
       </div>
-
       <div class="topbar-actions">
-        <button class="mobile-menu" onclick="toggleMobileNavigation()">☰</button>
-
+        <button class="mobile-menu" onclick="toggleMobileNavigation()" aria-label="Open navigation">☰</button>
         <label class="search-box">
           <span>⌕</span>
           <input id="globalSearch" type="search" placeholder="Search library" oninput="searchLibrary(this.value)" />
         </label>
-
         <button class="top-icon" onclick="showToast('No new notifications.')">♢</button>
         <button class="top-icon" onclick="openPage('settings')">⚙</button>
         <button class="primary-button" onclick="openModal('roomModal')">＋ Start a circle</button>
@@ -1761,54 +1160,29 @@ textarea {
         <article class="hero-card card">
           <div class="kicker">Your next small win</div>
           <h2>Twenty-five calm minutes can change the whole evening.</h2>
-          <p>
-            You are only <strong id="pagesRemaining">64 pages</strong> from your weekly target.
-            Protect a little space for the ideas you care about.
-          </p>
+          <p>You are only <strong id="pagesRemaining">64 pages</strong> from your weekly target. Protect a little space for the ideas you care about.</p>
           <button class="primary-button" onclick="openPage('reader')">Continue reading →</button>
         </article>
-
         <article class="stat-card card">
-          <div class="stat-top">
-            <span>Weekly progress</span>
-            <span id="weeklyPercent">68%</span>
-          </div>
-
+          <div class="stat-top"><span>Weekly progress</span><span id="weeklyPercent">68%</span></div>
           <div>
             <div class="stat-value"><span id="pagesRead">136</span><span> / 200</span></div>
             <p class="muted small-text">pages read this week</p>
           </div>
-
           <div>
-            <div class="progress-track">
-              <span class="progress-fill" id="weeklyProgress" style="width:68%"></span>
-            </div>
-            <div class="progress-label">
-              <span>Keep your rhythm</span>
-              <span>64 pages left</span>
-            </div>
+            <div class="progress-track"><span class="progress-fill" id="weeklyProgress" style="width:68%"></span></div>
+            <div class="progress-label"><span>Keep your rhythm</span><span>64 pages left</span></div>
           </div>
         </article>
-
         <article class="stat-card card">
-          <div class="stat-top">
-            <span>Current streak</span>
-            <span>● Active</span>
-          </div>
-
+          <div class="stat-top"><span>Current streak</span><span>● Active</span></div>
           <div>
             <div class="stat-value" id="streakValue">7</div>
             <p class="muted small-text">days of showing up</p>
           </div>
-
           <div>
-            <div class="progress-track">
-              <span class="progress-fill gold" style="width:58%"></span>
-            </div>
-            <div class="progress-label">
-              <span>Best: 12 days</span>
-              <span>5 more to beat it</span>
-            </div>
+            <div class="progress-track"><span class="progress-fill gold" style="width:58%"></span></div>
+            <div class="progress-label"><span>Best: 12 days</span><span>5 more to beat it</span></div>
           </div>
         </article>
       </div>
@@ -1829,20 +1203,11 @@ textarea {
             </div>
           </div>
           <div class="book-progress">
-            <div class="progress-label">
-              <span>47% complete</span>
-              <span>18 min left</span>
-            </div>
-            <div class="progress-track">
-              <span class="progress-fill" style="width:47%"></span>
-            </div>
+            <div class="progress-label"><span>47% complete</span><span>18 min left</span></div>
+            <div class="progress-track"><span class="progress-fill" style="width:47%"></span></div>
           </div>
-          <div class="book-footer">
-            <span class="tag">In progress</span>
-            <button class="ghost-button" onclick="openPage('reader')">Open →</button>
-          </div>
+          <div class="book-footer"><span class="tag">In progress</span><button class="ghost-button" onclick="openPage('reader')">Open →</button></div>
         </article>
-
         <article class="book-card card" data-title="Atomic Habits">
           <div class="book-main">
             <div class="book-cover cover-orange">Atomic<br />Habits</div>
@@ -1853,20 +1218,11 @@ textarea {
             </div>
           </div>
           <div class="book-progress">
-            <div class="progress-label">
-              <span>32% complete</span>
-              <span>24 min left</span>
-            </div>
-            <div class="progress-track">
-              <span class="progress-fill orange" style="width:32%"></span>
-            </div>
+            <div class="progress-label"><span>32% complete</span><span>24 min left</span></div>
+            <div class="progress-track"><span class="progress-fill orange" style="width:32%"></span></div>
           </div>
-          <div class="book-footer">
-            <span class="tag">Habit building</span>
-            <button class="ghost-button" onclick="openPage('reader')">Open →</button>
-          </div>
+          <div class="book-footer"><span class="tag">Habit building</span><button class="ghost-button" onclick="openPage('reader')">Open →</button></div>
         </article>
-
         <article class="book-card card" data-title="The Creative Act">
           <div class="book-main">
             <div class="book-cover cover-blue">The<br />Creative<br />Act</div>
@@ -1877,18 +1233,10 @@ textarea {
             </div>
           </div>
           <div class="book-progress">
-            <div class="progress-label">
-              <span>12% complete</span>
-              <span>37 min left</span>
-            </div>
-            <div class="progress-track">
-              <span class="progress-fill" style="width:12%"></span>
-            </div>
+            <div class="progress-label"><span>12% complete</span><span>37 min left</span></div>
+            <div class="progress-track"><span class="progress-fill" style="width:12%"></span></div>
           </div>
-          <div class="book-footer">
-            <span class="tag">Creative practice</span>
-            <button class="ghost-button" onclick="openPage('reader')">Open →</button>
-          </div>
+          <div class="book-footer"><span class="tag">Creative practice</span><button class="ghost-button" onclick="openPage('reader')">Open →</button></div>
         </article>
       </div>
 
@@ -1901,11 +1249,7 @@ textarea {
         <article class="rhythm-card card">
           <div class="kicker">A pattern worth keeping</div>
           <h3>Your focus is strongest around 8 PM.</h3>
-          <p class="muted small-text">
-            Your sessions are most consistent when they last between 20 and 30 minutes.
-            Tonight's recommendation is shaped around that pattern.
-          </p>
-
+          <p class="muted small-text">Your sessions are most consistent when they last between 20 and 30 minutes. Tonight's recommendation is shaped around that pattern.</p>
           <div class="week-chart">
             <div class="week-column"><span class="week-bar" style="height:38%"></span><span>Mon</span></div>
             <div class="week-column"><span class="week-bar" style="height:60%"></span><span>Tue</span></div>
@@ -1916,25 +1260,16 @@ textarea {
             <div class="week-column"><span class="week-bar today" style="height:35%"></span><span>Today</span></div>
           </div>
         </article>
-
         <article class="reward-card card">
           <div class="kicker">Recent rewards</div>
-          <h3 style="font-family:'DM Serif Display',serif;font-size:25px;font-weight:400;margin-top:9px;">
-            You are collecting momentum.
-          </h3>
-
+          <h3 style="font-family:'DM Serif Display',serif;font-size:25px;font-weight:400;margin-top:9px;">You are collecting momentum.</h3>
           <div class="badge-row">
             <div class="reward-badge">🌱</div>
             <div class="reward-badge">🔥</div>
             <div class="reward-badge">📚</div>
             <div class="reward-badge locked">✦</div>
           </div>
-
-          <p class="muted small-text" style="margin-top:16px;">
-            3 badges earned this week. Read 64 more pages to unlock
-            <strong>Page Turner</strong>.
-          </p>
-
+          <p class="muted small-text" style="margin-top:16px;">3 badges earned this week. Read 64 more pages to unlock <strong>Page Turner</strong>.</p>
           <div class="streak-strip">
             <div class="streak-number" id="streakSmall">7</div>
             <div>
@@ -1945,43 +1280,21 @@ textarea {
         </article>
       </div>
 
-      <div class="section-row">
-        <h2>Quick actions</h2>
-      </div>
-
+      <div class="section-row"><h2>Quick actions</h2></div>
       <div class="quick-actions">
-        <button class="quick-action" onclick="openPage('reader')">
-          <span>◉</span>
-          <strong>Start focused reading</strong>
-        </button>
-
-        <button class="quick-action" onclick="openModal('aiModal')">
-          <span>✦</span>
-          <strong>Ask the AI guide</strong>
-        </button>
-
-        <button class="quick-action" onclick="openModal('quizModal')">
-          <span>?</span>
-          <strong>Test your recall</strong>
-        </button>
-
-        <button class="quick-action" onclick="openModal('roomModal')">
-          <span>♧</span>
-          <strong>Study with others</strong>
-        </button>
+        <button class="quick-action" onclick="openPage('reader')"><span>◉</span><strong>Start focused reading</strong></button>
+        <button class="quick-action" onclick="openModal('aiModal')"><span>✦</span><strong>Ask the AI guide</strong></button>
+        <button class="quick-action" onclick="openModal('quizModal')"><span>?</span><strong>Test your recall</strong></button>
+        <button class="quick-action" onclick="openModal('roomModal')"><span>♧</span><strong>Study with others</strong></button>
       </div>
     </section>
 
     <!-- Library -->
     <section class="page" id="library">
       <div class="page-heading">
-        <div>
-          <div class="kicker">Your personal shelf</div>
-          <h1>My library.</h1>
-        </div>
+        <div><div class="kicker">Your personal shelf</div><h1>My library.</h1></div>
         <button class="primary-button" onclick="openModal('uploadModal')">＋ Import PDF</button>
       </div>
-
       <div class="card card-padding">
         <div class="section-row" style="margin-top:0;">
           <div>
@@ -1994,159 +1307,69 @@ textarea {
             <option value="title">Title</option>
           </select>
         </div>
-
         <div class="grid library-grid" id="libraryBooks">
           <article class="book-card card" data-title="Deep Work" data-progress="47">
-            <div class="book-main">
-              <div class="book-cover cover-green">Deep<br />Work</div>
-              <div>
-                <div class="book-title">Deep Work</div>
-                <div class="book-author">Cal Newport</div>
-                <div class="book-author">304 pages</div>
-              </div>
-            </div>
-            <div class="book-progress">
-              <div class="progress-label"><span>47% complete</span><span>142 pages</span></div>
-              <div class="progress-track"><span class="progress-fill" style="width:47%"></span></div>
-            </div>
+            <div class="book-main"><div class="book-cover cover-green">Deep<br />Work</div><div><div class="book-title">Deep Work</div><div class="book-author">Cal Newport</div><div class="book-author">304 pages</div></div></div>
+            <div class="book-progress"><div class="progress-label"><span>47% complete</span><span>142 pages</span></div><div class="progress-track"><span class="progress-fill" style="width:47%"></span></div></div>
             <div class="book-footer"><span class="tag">Reading now</span><button class="ghost-button" onclick="openPage('reader')">Open →</button></div>
           </article>
-
           <article class="book-card card" data-title="Atomic Habits" data-progress="32">
-            <div class="book-main">
-              <div class="book-cover cover-orange">Atomic<br />Habits</div>
-              <div>
-                <div class="book-title">Atomic Habits</div>
-                <div class="book-author">James Clear</div>
-                <div class="book-author">272 pages</div>
-              </div>
-            </div>
-            <div class="book-progress">
-              <div class="progress-label"><span>32% complete</span><span>86 pages</span></div>
-              <div class="progress-track"><span class="progress-fill orange" style="width:32%"></span></div>
-            </div>
+            <div class="book-main"><div class="book-cover cover-orange">Atomic<br />Habits</div><div><div class="book-title">Atomic Habits</div><div class="book-author">James Clear</div><div class="book-author">272 pages</div></div></div>
+            <div class="book-progress"><div class="progress-label"><span>32% complete</span><span>86 pages</span></div><div class="progress-track"><span class="progress-fill orange" style="width:32%"></span></div></div>
             <div class="book-footer"><span class="tag">Habit building</span><button class="ghost-button" onclick="openPage('reader')">Open →</button></div>
           </article>
-
           <article class="book-card card" data-title="The Creative Act" data-progress="12">
-            <div class="book-main">
-              <div class="book-cover cover-blue">The<br />Creative<br />Act</div>
-              <div>
-                <div class="book-title">The Creative Act</div>
-                <div class="book-author">Rick Rubin</div>
-                <div class="book-author">240 pages</div>
-              </div>
-            </div>
-            <div class="book-progress">
-              <div class="progress-label"><span>12% complete</span><span>28 pages</span></div>
-              <div class="progress-track"><span class="progress-fill" style="width:12%"></span></div>
-            </div>
+            <div class="book-main"><div class="book-cover cover-blue">The<br />Creative<br />Act</div><div><div class="book-title">The Creative Act</div><div class="book-author">Rick Rubin</div><div class="book-author">240 pages</div></div></div>
+            <div class="book-progress"><div class="progress-label"><span>12% complete</span><span>28 pages</span></div><div class="progress-track"><span class="progress-fill" style="width:12%"></span></div></div>
             <div class="book-footer"><span class="tag">Creative practice</span><button class="ghost-button" onclick="openPage('reader')">Open →</button></div>
           </article>
-
           <article class="book-card card" data-title="The Almanack of Naval Ravikant" data-progress="0">
-            <div class="book-main">
-              <div class="book-cover cover-purple">The<br />Almanack</div>
-              <div>
-                <div class="book-title">The Almanack of Naval Ravikant</div>
-                <div class="book-author">Eric Jorgenson</div>
-                <div class="book-author">242 pages</div>
-              </div>
-            </div>
-            <div class="book-progress">
-              <div class="progress-label"><span>Not started</span><span>242 pages</span></div>
-              <div class="progress-track"><span class="progress-fill" style="width:2%"></span></div>
-            </div>
+            <div class="book-main"><div class="book-cover cover-purple">The<br />Almanack</div><div><div class="book-title">The Almanack of Naval Ravikant</div><div class="book-author">Eric Jorgenson</div><div class="book-author">242 pages</div></div></div>
+            <div class="book-progress"><div class="progress-label"><span>Not started</span><span>242 pages</span></div><div class="progress-track"><span class="progress-fill" style="width:2%"></span></div></div>
             <div class="book-footer"><span class="tag">Saved for later</span><button class="ghost-button" onclick="openPage('reader')">Open →</button></div>
           </article>
         </div>
       </div>
-
       <div class="section-row">
         <h2>Reading collections</h2>
         <button class="secondary-button" onclick="showToast('Collection creation is ready for your backend.')">＋ New collection</button>
       </div>
-
       <div class="grid library-grid">
-        <article class="card card-padding">
-          <div class="kicker">Collection 01</div>
-          <h3 style="font-family:'DM Serif Display',serif;font-size:22px;font-weight:400;margin-top:8px;">Better work</h3>
-          <p class="muted small-text">3 books · 46% average completion</p>
-        </article>
-
-        <article class="card card-padding">
-          <div class="kicker">Collection 02</div>
-          <h3 style="font-family:'DM Serif Display',serif;font-size:22px;font-weight:400;margin-top:8px;">Ideas to revisit</h3>
-          <p class="muted small-text">8 highlights · 15 saved annotations</p>
-        </article>
-
-        <article class="card card-padding">
-          <div class="kicker">Collection 03</div>
-          <h3 style="font-family:'DM Serif Display',serif;font-size:22px;font-weight:400;margin-top:8px;">Course reading</h3>
-          <p class="muted small-text">2 books · 4 active study circles</p>
-        </article>
+        <article class="card card-padding"><div class="kicker">Collection 01</div><h3 style="font-family:'DM Serif Display',serif;font-size:22px;font-weight:400;margin-top:8px;">Better work</h3><p class="muted small-text">3 books · 46% average completion</p></article>
+        <article class="card card-padding"><div class="kicker">Collection 02</div><h3 style="font-family:'DM Serif Display',serif;font-size:22px;font-weight:400;margin-top:8px;">Ideas to revisit</h3><p class="muted small-text">8 highlights · 15 saved annotations</p></article>
+        <article class="card card-padding"><div class="kicker">Collection 03</div><h3 style="font-family:'DM Serif Display',serif;font-size:22px;font-weight:400;margin-top:8px;">Course reading</h3><p class="muted small-text">2 books · 4 active study circles</p></article>
       </div>
     </section>
 
     <!-- Reader -->
     <section class="page" id="reader">
       <div class="page-heading">
-        <div>
-          <div class="kicker">Deep Work · Chapter 4</div>
-          <h1>Reading room.</h1>
-        </div>
+        <div><div class="kicker">Deep Work · Chapter 4</div><h1>Reading room.</h1></div>
         <div class="tag">Page 142 of 304</div>
       </div>
-
       <div class="reader-toolbar">
-        <button class="secondary-button" onclick="openPage('dashboard')">← Dashboard</button>
-        <button class="secondary-button" onclick="highlightSelection()">Highlight selection</button>
-        <button class="secondary-button" onclick="focusAnnotation()">＋ Annotation</button>
-        <button class="secondary-button" onclick="openModal('aiModal')">✦ Ask AI guide</button>
-        <button class="secondary-button" onclick="openModal('quizModal')">? Recall quiz</button>
+        <button class="secondary-button" onclick="openPage('dashboard')">← Back</button>
+        <button class="secondary-button" onclick="highlightSelection()">Highlight</button>
+        <button class="secondary-button" onclick="focusAnnotation()">＋ Note</button>
+        <button class="secondary-button" onclick="openModal('aiModal')">✦ AI</button>
+        <button class="secondary-button" onclick="openModal('quizModal')">? Quiz</button>
       </div>
-
       <div class="reader-layout">
         <div class="reader-stage">
           <article class="document" id="documentText">
             <div class="document-meta">Deep Work / Chapter 4 / The Rules</div>
             <h2>Quit Social Media</h2>
-
-            <p>
-              High-quality work requires sustained attention. The ability to concentrate
-              without distraction is becoming increasingly valuable in a world where
-              interruptions are constant.
-            </p>
-
-            <p>
-              <span class="highlight">
-                Clarity about what deserves your attention is the first step toward meaningful progress.
-              </span>
-            </p>
-
-            <p>
-              Instead of allowing every notification to define your next action, create
-              a deliberate environment. Choose a small window of time, remove the obvious
-              distractions, and begin with a clear intention.
-            </p>
-
-            <p>
-              Reading is not a race. It is a conversation with an idea. Let the idea finish
-              its sentence before you reach for something else.
-            </p>
-
-            <p>
-              The goal is not to avoid all modern tools. The goal is to make sure your tools
-              serve your values instead of quietly replacing them.
-            </p>
-
+            <p>High-quality work requires sustained attention. The ability to concentrate without distraction is becoming increasingly valuable in a world where interruptions are constant.</p>
+            <p><span class="highlight">Clarity about what deserves your attention is the first step toward meaningful progress.</span></p>
+            <p>Instead of allowing every notification to define your next action, create a deliberate environment. Choose a small window of time, remove the obvious distractions, and begin with a clear intention.</p>
+            <p>Reading is not a race. It is a conversation with an idea. Let the idea finish its sentence before you reach for something else.</p>
+            <p>The goal is not to avoid all modern tools. The goal is to make sure your tools serve your values instead of quietly replacing them.</p>
             <div class="document-footer">
               <span>Reading progress updates as pages are completed</span>
               <button class="primary-button" onclick="completePage()">Mark page complete →</button>
             </div>
           </article>
         </div>
-
         <aside class="reader-sidebar">
           <div class="timer-card">
             <div class="kicker">Deep reading session</div>
@@ -2154,62 +1377,30 @@ textarea {
             <div class="timer-status" id="timerStatus">Ready when you are.</div>
             <button id="timerButton" onclick="toggleTimer()">Start session</button>
           </div>
-
           <div class="card side-panel">
-            <div class="panel-heading">
-              <h3>Session progress</h3>
-              <span class="panel-count">4/12</span>
-            </div>
-
-            <div class="progress-track large">
-              <span class="progress-fill" style="width:33%"></span>
-            </div>
-
-            <div class="progress-label">
-              <span>Pages completed</span>
-              <span>33%</span>
-            </div>
-
+            <div class="panel-heading"><h3>Session progress</h3><span class="panel-count">4/12</span></div>
+            <div class="progress-track large"><span class="progress-fill" style="width:33%"></span></div>
+            <div class="progress-label"><span>Pages completed</span><span>33%</span></div>
             <div class="streak-strip">
               <div class="streak-number">+12</div>
-              <div>
-                <strong style="font-size:11px;">XP earned</strong>
-                <div class="muted small-text">for staying with it</div>
-              </div>
+              <div><strong style="font-size:11px;">XP earned</strong><div class="muted small-text">for staying with it</div></div>
             </div>
           </div>
-
           <div class="card side-panel">
-            <div class="panel-heading">
-              <h3>Focus atmosphere</h3>
-              <span>♫</span>
-            </div>
-
+            <div class="panel-heading"><h3>Focus atmosphere</h3><span>♫</span></div>
             <div class="music-control">
-              <div>
-                <strong id="musicName">Rain on windows</strong>
-                <small id="musicStatus">Background sound off</small>
-              </div>
+              <div><strong id="musicName">Rain on windows</strong><small id="musicStatus">Background sound off</small></div>
               <button class="toggle" id="musicToggle" onclick="toggleMusic()"></button>
             </div>
-
             <div style="display:grid;gap:7px;margin-top:10px;">
               <button class="secondary-button full-width" onclick="changeSound('Rain on windows')">Rain on windows</button>
               <button class="secondary-button full-width" onclick="changeSound('Quiet forest')">Quiet forest</button>
               <button class="secondary-button full-width" onclick="changeSound('Soft cafe')">Soft cafe</button>
             </div>
           </div>
-
           <div class="card side-panel">
-            <div class="panel-heading">
-              <h3>Annotations</h3>
-              <span class="panel-count" id="annotationCount">1</span>
-            </div>
-
-            <div class="note-list" id="noteList">
-              <div class="note">Clarity about what deserves your attention.</div>
-            </div>
-
+            <div class="panel-heading"><h3>Annotations</h3><span class="panel-count" id="annotationCount">1</span></div>
+            <div class="note-list" id="noteList"><div class="note">Clarity about what deserves your attention.</div></div>
             <textarea id="annotationInput" placeholder="Capture a thought, question, or connection..."></textarea>
             <button class="primary-button full-width" style="margin-top:8px;" onclick="saveAnnotation()">Save annotation</button>
           </div>
@@ -2220,187 +1411,83 @@ textarea {
     <!-- Study Circles -->
     <section class="page" id="rooms">
       <div class="page-heading">
-        <div>
-          <div class="kicker">Shared accountability</div>
-          <h1>Study circles.</h1>
-        </div>
+        <div><div class="kicker">Shared accountability</div><h1>Study circles.</h1></div>
         <button class="primary-button" onclick="openModal('roomModal')">＋ Create circle</button>
       </div>
-
       <div class="grid room-grid">
         <div class="card card-padding">
           <div class="section-row" style="margin-top:0;">
-            <div>
-              <h2>Find your people</h2>
-              <p class="muted small-text">Quiet company, shared progress, no pressure.</p>
-            </div>
+            <div><h2>Find your people</h2><p class="muted small-text">Quiet company, shared progress, no pressure.</p></div>
             <span class="tag">12 active now</span>
           </div>
-
           <div class="room-list">
             <article class="room-card card">
               <div class="room-icon">🌿</div>
               <div class="room-details">
                 <h3>Quiet Minds · Deep Work</h3>
                 <p><span class="online-dot"></span>4 people reading together now</p>
-                <div class="room-members">
-                  <div class="mini-avatar">AS</div>
-                  <div class="mini-avatar blue">JM</div>
-                  <div class="mini-avatar green">RK</div>
-                  <div class="mini-avatar purple">TD</div>
-                </div>
+                <div class="room-members"><div class="mini-avatar">AS</div><div class="mini-avatar blue">JM</div><div class="mini-avatar green">RK</div><div class="mini-avatar purple">TD</div></div>
               </div>
               <button class="primary-button" onclick="joinRoom(this)">Join</button>
             </article>
-
             <article class="room-card card">
               <div class="room-icon" style="background:#f9e4c2;">☕</div>
               <div class="room-details">
                 <h3>Sunday Pages</h3>
                 <p>8 people · begins in 20 minutes</p>
-                <div class="room-members">
-                  <div class="mini-avatar orange">ML</div>
-                  <div class="mini-avatar blue">SK</div>
-                  <div class="mini-avatar green">JR</div>
-                </div>
+                <div class="room-members"><div class="mini-avatar orange">ML</div><div class="mini-avatar blue">SK</div><div class="mini-avatar green">JR</div></div>
               </div>
               <button class="secondary-button" onclick="joinRoom(this)">Join</button>
             </article>
-
             <article class="room-card card">
               <div class="room-icon" style="background:#eadff5;">◎</div>
               <div class="room-details">
-                <h3>Philosophy & Coffee</h3>
+                <h3>Philosophy &amp; Coffee</h3>
                 <p>6 people · discussing chapter 7</p>
-                <div class="room-members">
-                  <div class="mini-avatar purple">NV</div>
-                  <div class="mini-avatar">AR</div>
-                  <div class="mini-avatar blue">LC</div>
-                </div>
+                <div class="room-members"><div class="mini-avatar purple">NV</div><div class="mini-avatar">AR</div><div class="mini-avatar blue">LC</div></div>
               </div>
               <button class="secondary-button" onclick="joinRoom(this)">Join</button>
             </article>
           </div>
         </div>
-
         <div class="card invite-card">
           <div class="kicker">Your active circle</div>
           <h2 style="margin-top:9px;">Quiet Minds</h2>
-          <p class="muted small-text">
-            Everyone sees shared page progress and milestone updates.
-            Individual notes stay private unless you choose to share them.
-          </p>
-
+          <p class="muted small-text">Everyone sees shared page progress and milestone updates. Individual notes stay private unless you choose to share them.</p>
           <div class="invite-link">
             <input id="inviteInput" value="leafline.app/circle/quiet-minds-8K2P" readonly />
             <button class="secondary-button" onclick="copyInvite()">Copy</button>
           </div>
-
-          <button class="primary-button full-width" onclick="showToast('Invite link copied to clipboard.')">
-            Invite study partner
-          </button>
-
+          <button class="primary-button full-width" onclick="showToast('Invite link copied to clipboard.')">Invite study partner</button>
           <div style="margin-top:26px;">
             <div class="kicker">People in this circle</div>
-
-            <div class="room-member-row">
-              <div class="member-info">
-                <div class="mini-avatar">AS</div>
-                <span>You</span>
-              </div>
-              <span class="tag">Reading</span>
-            </div>
-
-            <div class="room-member-row">
-              <div class="member-info">
-                <div class="mini-avatar blue">JM</div>
-                <span>Jamie Miller</span>
-              </div>
-              <span class="online-dot"></span>
-            </div>
-
-            <div class="room-member-row">
-              <div class="member-info">
-                <div class="mini-avatar green">RK</div>
-                <span>Riya Kapoor</span>
-              </div>
-              <span class="online-dot"></span>
-            </div>
-
-            <div class="room-member-row">
-              <div class="member-info">
-                <div class="mini-avatar purple">TD</div>
-                <span>Theo Davis</span>
-              </div>
-              <span class="muted small-text">Away</span>
-            </div>
+            <div class="room-member-row"><div class="member-info"><div class="mini-avatar">AS</div><span>You</span></div><span class="tag">Reading</span></div>
+            <div class="room-member-row"><div class="member-info"><div class="mini-avatar blue">JM</div><span>Jamie Miller</span></div><span class="online-dot"></span></div>
+            <div class="room-member-row"><div class="member-info"><div class="mini-avatar green">RK</div><span>Riya Kapoor</span></div><span class="online-dot"></span></div>
+            <div class="room-member-row"><div class="member-info"><div class="mini-avatar purple">TD</div><span>Theo Davis</span></div><span class="muted small-text">Away</span></div>
           </div>
         </div>
       </div>
-
-      <div class="section-row">
-        <h2>Circle rituals</h2>
-      </div>
-
+      <div class="section-row"><h2>Circle rituals</h2></div>
       <div class="grid library-grid">
-        <div class="card card-padding">
-          <div class="kicker">01 · Before reading</div>
-          <h3 style="font-family:'DM Serif Display',serif;font-size:22px;font-weight:400;margin-top:9px;">Set an intention</h3>
-          <p class="muted small-text">Each person writes what they want to understand before the timer begins.</p>
-        </div>
-
-        <div class="card card-padding">
-          <div class="kicker">02 · During reading</div>
-          <h3 style="font-family:'DM Serif Display',serif;font-size:22px;font-weight:400;margin-top:9px;">Silent co-presence</h3>
-          <p class="muted small-text">A focused room shows who is reading without chat interruptions.</p>
-        </div>
-
-        <div class="card card-padding">
-          <div class="kicker">03 · After reading</div>
-          <h3 style="font-family:'DM Serif Display',serif;font-size:22px;font-weight:400;margin-top:9px;">Share one idea</h3>
-          <p class="muted small-text">A lightweight reflection and quiz close the session with meaningful recall.</p>
-        </div>
+        <div class="card card-padding"><div class="kicker">01 · Before reading</div><h3 style="font-family:'DM Serif Display',serif;font-size:22px;font-weight:400;margin-top:9px;">Set an intention</h3><p class="muted small-text">Each person writes what they want to understand before the timer begins.</p></div>
+        <div class="card card-padding"><div class="kicker">02 · During reading</div><h3 style="font-family:'DM Serif Display',serif;font-size:22px;font-weight:400;margin-top:9px;">Silent co-presence</h3><p class="muted small-text">A focused room shows who is reading without chat interruptions.</p></div>
+        <div class="card card-padding"><div class="kicker">03 · After reading</div><h3 style="font-family:'DM Serif Display',serif;font-size:22px;font-weight:400;margin-top:9px;">Share one idea</h3><p class="muted small-text">A lightweight reflection and quiz close the session with meaningful recall.</p></div>
       </div>
     </section>
 
     <!-- Analytics -->
     <section class="page" id="analytics">
       <div class="page-heading">
-        <div>
-          <div class="kicker">Personalized feedback</div>
-          <h1>Your progress, understood.</h1>
-        </div>
+        <div><div class="kicker">Personalized feedback</div><h1>Your progress, understood.</h1></div>
         <button class="secondary-button" onclick="showToast('Progress report prepared.')">Export report</button>
       </div>
-
       <div class="grid analytics-grid">
-        <article class="analytics-card card">
-          <div class="kicker">Focus time</div>
-          <div class="analytics-number">3h 42m</div>
-          <div class="muted small-text">This week</div>
-          <div class="progress-track" style="margin-top:18px;"><span class="progress-fill" style="width:74%"></span></div>
-        </article>
-
-        <article class="analytics-card card">
-          <div class="kicker">Pages completed</div>
-          <div class="analytics-number" id="analyticsPages">136</div>
-          <div class="muted small-text">Across 4 books</div>
-          <div class="progress-track" style="margin-top:18px;"><span class="progress-fill orange" style="width:68%"></span></div>
-        </article>
-
-        <article class="analytics-card card">
-          <div class="kicker">Recall accuracy</div>
-          <div class="analytics-number">86%</div>
-          <div class="muted small-text">Across recent quizzes</div>
-          <div class="progress-track" style="margin-top:18px;"><span class="progress-fill gold" style="width:86%"></span></div>
-        </article>
+        <article class="analytics-card card"><div class="kicker">Focus time</div><div class="analytics-number">3h 42m</div><div class="muted small-text">This week</div><div class="progress-track" style="margin-top:18px;"><span class="progress-fill" style="width:74%"></span></div></article>
+        <article class="analytics-card card"><div class="kicker">Pages completed</div><div class="analytics-number" id="analyticsPages">136</div><div class="muted small-text">Across 4 books</div><div class="progress-track" style="margin-top:18px;"><span class="progress-fill orange" style="width:68%"></span></div></article>
+        <article class="analytics-card card"><div class="kicker">Recall accuracy</div><div class="analytics-number">86%</div><div class="muted small-text">Across recent quizzes</div><div class="progress-track" style="margin-top:18px;"><span class="progress-fill gold" style="width:86%"></span></div></article>
       </div>
-
-      <div class="section-row">
-        <h2>Weekly reading volume</h2>
-        <span class="muted small-text">Minutes in focused sessions</span>
-      </div>
-
+      <div class="section-row"><h2>Weekly reading volume</h2><span class="muted small-text">Minutes in focused sessions</span></div>
       <div class="grid insight-grid">
         <article class="chart-card card">
           <div class="bar-chart">
@@ -2413,192 +1500,74 @@ textarea {
             <div class="chart-column"><span class="chart-bar highlighted" style="height:42%"></span><span>Today</span></div>
           </div>
         </article>
-
         <article class="insight-card card">
           <div class="kicker">Leafline noticed</div>
-          <div class="insight-quote">
-            You retain more when you read for 20–30 minutes and write one annotation per chapter.
-          </div>
-          <p class="muted small-text">
-            Your recommended next session is 25 minutes at 8:00 PM.
-            This recommendation will adapt as your habits change.
-          </p>
+          <div class="insight-quote">You retain more when you read for 20–30 minutes and write one annotation per chapter.</div>
+          <p class="muted small-text">Your recommended next session is 25 minutes at 8:00 PM. This recommendation will adapt as your habits change.</p>
           <button class="primary-button" onclick="openPage('reader')">Start recommended session</button>
         </article>
       </div>
-
-      <div class="section-row">
-        <h2>Current goals</h2>
-      </div>
-
+      <div class="section-row"><h2>Current goals</h2></div>
       <div class="card goal-card">
         <div class="kicker">Weekly target</div>
         <h3 style="font-family:'DM Serif Display',serif;font-size:25px;font-weight:400;margin-top:8px;">Read 200 pages</h3>
         <p class="muted small-text">A realistic goal based on your current average.</p>
-
-        <div class="goal-row">
-          <div>
-            <label>Progress</label>
-            <div class="progress-track large"><span class="progress-fill" style="width:68%"></span></div>
-          </div>
-          <input value="136 / 200" readonly />
-        </div>
+        <div class="goal-row"><div><label>Progress</label><div class="progress-track large"><span class="progress-fill" style="width:68%"></span></div></div><input value="136 / 200" readonly /></div>
       </div>
     </section>
 
     <!-- Rewards -->
     <section class="page" id="rewards">
       <div class="page-heading">
-        <div>
-          <div class="kicker">Small rewards, lasting rhythm</div>
-          <h1>Your rewards.</h1>
-        </div>
+        <div><div class="kicker">Small rewards, lasting rhythm</div><h1>Your rewards.</h1></div>
         <span class="tag">Level 8 · 1,280 XP</span>
       </div>
-
       <div class="card hero-card">
         <div class="kicker">Next unlock</div>
         <h2>Page Turner</h2>
         <p>Read 64 more pages this week to unlock a new profile accent and milestone animation.</p>
-        <div class="progress-track" style="max-width:400px;background:rgba(255,255,255,.23);">
-          <span class="progress-fill" style="width:68%;background:var(--lime);"></span>
-        </div>
+        <div class="progress-track" style="max-width:400px;background:rgba(255,255,255,.23);"><span class="progress-fill" style="width:68%;background:var(--lime);"></span></div>
       </div>
-
-      <div class="section-row">
-        <h2>Achievement shelf</h2>
-      </div>
-
+      <div class="section-row"><h2>Achievement shelf</h2></div>
       <div class="grid library-grid">
-        <div class="card card-padding">
-          <div class="reward-badge">🌱</div>
-          <h3 style="margin-top:15px;">First Seed</h3>
-          <p class="muted small-text">Completed your first reading session.</p>
-          <span class="tag">Earned</span>
-        </div>
-
-        <div class="card card-padding">
-          <div class="reward-badge">🔥</div>
-          <h3 style="margin-top:15px;">Seven Strong</h3>
-          <p class="muted small-text">Maintained a seven-day reading streak.</p>
-          <span class="tag">Earned</span>
-        </div>
-
-        <div class="card card-padding">
-          <div class="reward-badge">📚</div>
-          <h3 style="margin-top:15px;">Book Builder</h3>
-          <p class="muted small-text">Read from three different books in one week.</p>
-          <span class="tag">Earned</span>
-        </div>
-
-        <div class="card card-padding">
-          <div class="reward-badge locked">✦</div>
-          <h3 style="margin-top:15px;">Page Turner</h3>
-          <p class="muted small-text">Complete 200 pages in one week.</p>
-          <span class="tag" style="background:#f3f4ef;color:var(--muted);">64 pages left</span>
-        </div>
-
-        <div class="card card-padding">
-          <div class="reward-badge locked">🧠</div>
-          <h3 style="margin-top:15px;">Clear Recall</h3>
-          <p class="muted small-text">Score above 90% on five quizzes.</p>
-          <span class="tag" style="background:#f3f4ef;color:var(--muted);">3 of 5 quizzes</span>
-        </div>
-
-        <div class="card card-padding">
-          <div class="reward-badge locked">🏆</div>
-          <h3 style="margin-top:15px;">Library Builder</h3>
-          <p class="muted small-text">Complete ten books.</p>
-          <span class="tag" style="background:#f3f4ef;color:var(--muted);">4 of 10 books</span>
-        </div>
+        <div class="card card-padding"><div class="reward-badge">🌱</div><h3 style="margin-top:15px;">First Seed</h3><p class="muted small-text">Completed your first reading session.</p><span class="tag">Earned</span></div>
+        <div class="card card-padding"><div class="reward-badge">🔥</div><h3 style="margin-top:15px;">Seven Strong</h3><p class="muted small-text">Maintained a seven-day reading streak.</p><span class="tag">Earned</span></div>
+        <div class="card card-padding"><div class="reward-badge">📚</div><h3 style="margin-top:15px;">Book Builder</h3><p class="muted small-text">Read from three different books in one week.</p><span class="tag">Earned</span></div>
+        <div class="card card-padding"><div class="reward-badge locked">✦</div><h3 style="margin-top:15px;">Page Turner</h3><p class="muted small-text">Complete 200 pages in one week.</p><span class="tag" style="background:#f3f4ef;color:var(--muted);">64 pages left</span></div>
+        <div class="card card-padding"><div class="reward-badge locked">🧠</div><h3 style="margin-top:15px;">Clear Recall</h3><p class="muted small-text">Score above 90% on five quizzes.</p><span class="tag" style="background:#f3f4ef;color:var(--muted);">3 of 5 quizzes</span></div>
+        <div class="card card-padding"><div class="reward-badge locked">🏆</div><h3 style="margin-top:15px;">Library Builder</h3><p class="muted small-text">Complete ten books.</p><span class="tag" style="background:#f3f4ef;color:var(--muted);">4 of 10 books</span></div>
       </div>
     </section>
 
     <!-- Settings -->
     <section class="page" id="settings">
       <div class="page-heading">
-        <div>
-          <div class="kicker">Make the space yours</div>
-          <h1>Preferences.</h1>
-        </div>
+        <div><div class="kicker">Make the space yours</div><h1>Preferences.</h1></div>
         <button class="primary-button" onclick="savePreferences()">Save changes</button>
       </div>
-
       <div class="grid activity-grid">
         <div class="card card-padding">
           <h2>Reading experience</h2>
           <p class="muted small-text" style="margin-top:9px;">Adjust Leafline to match how you actually read.</p>
-
           <div class="form-stack" style="margin-top:22px;">
-            <label class="form-label">
-              Default focus session
-              <select id="focusLength">
-                <option value="25">25 minutes</option>
-                <option value="20">20 minutes</option>
-                <option value="45">45 minutes</option>
-                <option value="60">60 minutes</option>
-              </select>
-            </label>
-
-            <label class="form-label">
-              Reading theme
-              <select id="readingTheme">
-                <option value="warm">Warm paper</option>
-                <option value="cool">Cool paper</option>
-                <option value="dark">Low light</option>
-              </select>
-            </label>
-
-            <label class="form-label">
-              Weekly page goal
-              <input id="pageGoal" type="number" value="200" min="10" max="10000" />
-            </label>
+            <label class="form-label">Default focus session<select id="focusLength"><option value="25">25 minutes</option><option value="20">20 minutes</option><option value="45">45 minutes</option><option value="60">60 minutes</option></select></label>
+            <label class="form-label">Reading theme<select id="readingTheme"><option value="warm">Warm paper</option><option value="cool">Cool paper</option><option value="dark">Low light</option></select></label>
+            <label class="form-label">Weekly page goal<input id="pageGoal" type="number" value="200" min="10" max="10000" /></label>
           </div>
         </div>
-
         <div class="card card-padding">
           <h2>Notifications</h2>
           <p class="muted small-text" style="margin-top:9px;">Only receive reminders that help you return.</p>
-
           <div style="display:grid;gap:17px;margin-top:24px;">
-            <div class="music-control">
-              <div>
-                <strong>Daily reading reminder</strong>
-                <small>Remind me at my best time</small>
-              </div>
-              <button class="toggle on" onclick="this.classList.toggle('on')"></button>
-            </div>
-
-            <div class="music-control">
-              <div>
-                <strong>Circle milestones</strong>
-                <small>Tell me when a study partner finishes</small>
-              </div>
-              <button class="toggle on" onclick="this.classList.toggle('on')"></button>
-            </div>
-
-            <div class="music-control">
-              <div>
-                <strong>Weekly reflection</strong>
-                <small>Send a Sunday progress summary</small>
-              </div>
-              <button class="toggle on" onclick="this.classList.toggle('on')"></button>
-            </div>
+            <div class="music-control"><div><strong>Daily reading reminder</strong><small>Remind me at my best time</small></div><button class="toggle on" onclick="this.classList.toggle('on')"></button></div>
+            <div class="music-control"><div><strong>Circle milestones</strong><small>Tell me when a study partner finishes</small></div><button class="toggle on" onclick="this.classList.toggle('on')"></button></div>
+            <div class="music-control"><div><strong>Weekly reflection</strong><small>Send a Sunday progress summary</small></div><button class="toggle on" onclick="this.classList.toggle('on')"></button></div>
           </div>
         </div>
       </div>
-
-      <div class="section-row">
-        <h2>Data controls</h2>
-      </div>
-
+      <div class="section-row"><h2>Data controls</h2></div>
       <div class="card card-padding">
-        <p class="muted small-text">
-          This demo stores your annotations, timer state, uploaded book names, and preferences
-          in your browser using localStorage. A production version should connect this layer to
-          authentication, a database, PDF parsing, real-time rooms, and a secure AI proxy.
-        </p>
-
+        <p class="muted small-text">This demo stores your annotations, timer state, uploaded book names, and preferences in your browser using localStorage. A production version should connect this layer to authentication, a database, PDF parsing, real-time rooms, and a secure AI proxy.</p>
         <div style="display:flex;gap:9px;flex-wrap:wrap;">
           <button class="secondary-button" onclick="exportData()">Export local data</button>
           <button class="danger-button" onclick="clearLocalData()">Clear local data</button>
@@ -2608,158 +1577,70 @@ textarea {
   </main>
 </div>
 
-<!-- Upload Modal -->
+<!-- Bottom Nav -->
+<nav class="bottom-nav" aria-label="Mobile navigation">
+  <div class="bottom-nav-inner">
+    <button class="bottom-nav-btn active" data-page="dashboard"><span class="bn-icon">⌂</span><span>Home</span></button>
+    <button class="bottom-nav-btn" data-page="library"><span class="bn-icon">▤</span><span>Library</span></button>
+    <button class="bottom-nav-btn" data-page="reader"><span class="bn-icon">◉</span><span>Reader</span></button>
+    <button class="bottom-nav-btn" data-page="rooms"><span class="bn-icon">♧</span><span>Circles</span></button>
+    <button class="bottom-nav-btn" data-page="analytics"><span class="bn-icon">↗</span><span>Insights</span></button>
+  </div>
+</nav>
+
+<!-- Modals -->
 <div class="modal-backdrop" id="uploadModal">
   <div class="modal">
-    <div class="modal-header">
-      <h2>Add a book</h2>
-      <button class="close-button" onclick="closeModal('uploadModal')">×</button>
-    </div>
-
-    <p class="muted small-text">
-      Select a PDF to add it to your local reading shelf. In a production app,
-      the file would be uploaded and parsed page by page.
-    </p>
-
+    <div class="modal-header"><h2>Add a book</h2><button class="close-button" onclick="closeModal('uploadModal')">×</button></div>
+    <p class="muted small-text">Select a PDF to add it to your local reading shelf.</p>
     <div class="form-stack">
-      <label class="form-label">
-        PDF file
-        <input id="pdfFile" type="file" accept=".pdf,application/pdf" />
-      </label>
-
+      <label class="form-label">PDF file<input id="pdfFile" type="file" accept=".pdf,application/pdf" /></label>
       <div class="form-row">
-        <label class="form-label">
-          Collection
-          <select>
-            <option>Personal reading</option>
-            <option>Better work</option>
-            <option>Course reading</option>
-            <option>Ideas to revisit</option>
-          </select>
-        </label>
-
-        <label class="form-label">
-          Priority
-          <select>
-            <option>Normal</option>
-            <option>High</option>
-            <option>Low pressure</option>
-          </select>
-        </label>
+        <label class="form-label">Collection<select><option>Personal reading</option><option>Better work</option><option>Course reading</option><option>Ideas to revisit</option></select></label>
+        <label class="form-label">Priority<select><option>Normal</option><option>High</option><option>Low pressure</option></select></label>
       </div>
-
       <button class="primary-button full-width" onclick="uploadBook()">Add to library</button>
     </div>
   </div>
 </div>
 
-<!-- Room Modal -->
 <div class="modal-backdrop" id="roomModal">
   <div class="modal">
-    <div class="modal-header">
-      <h2>Create a study circle</h2>
-      <button class="close-button" onclick="closeModal('roomModal')">×</button>
-    </div>
-
-    <p class="muted small-text">
-      Create a shared reading space with a synchronized timer, shared milestones,
-      private annotations, and optional post-session reflection.
-    </p>
-
+    <div class="modal-header"><h2>Create a study circle</h2><button class="close-button" onclick="closeModal('roomModal')">×</button></div>
+    <p class="muted small-text">Create a shared reading space with a synchronized timer, shared milestones, private annotations, and optional post-session reflection.</p>
     <div class="form-stack">
-      <label class="form-label">
-        Circle name
-        <input id="roomName" placeholder="Example: Quiet Sunday Reading" />
-      </label>
-
+      <label class="form-label">Circle name<input id="roomName" placeholder="Example: Quiet Sunday Reading" /></label>
       <div class="form-row">
-        <label class="form-label">
-          Session length
-          <select id="roomLength">
-            <option>25 minutes</option>
-            <option>45 minutes</option>
-            <option>60 minutes</option>
-            <option>Open session</option>
-          </select>
-        </label>
-
-        <label class="form-label">
-          Visibility
-          <select>
-            <option>Anyone with invite link</option>
-            <option>Invite only</option>
-          </select>
-        </label>
+        <label class="form-label">Session length<select id="roomLength"><option>25 minutes</option><option>45 minutes</option><option>60 minutes</option><option>Open session</option></select></label>
+        <label class="form-label">Visibility<select><option>Anyone with invite link</option><option>Invite only</option></select></label>
       </div>
-
-      <label class="form-label">
-        Optional intention
-        <textarea id="roomIntention" placeholder="What should this session help people do?"></textarea>
-      </label>
-
+      <label class="form-label">Optional intention<textarea id="roomIntention" placeholder="What should this session help people do?"></textarea></label>
       <button class="primary-button full-width" onclick="createRoom()">Create circle</button>
     </div>
   </div>
 </div>
 
-<!-- AI Modal -->
 <div class="modal-backdrop" id="aiModal">
   <div class="modal">
-    <div class="modal-header">
-      <h2>AI PDF guide</h2>
-      <button class="close-button" onclick="closeModal('aiModal')">×</button>
-    </div>
-
-    <p class="muted small-text">
-      Ask about the current page. The interface is ready to connect to your own
-      API route or AI provider without exposing a secret key in the browser.
-    </p>
-
+    <div class="modal-header"><h2>AI PDF guide</h2><button class="close-button" onclick="closeModal('aiModal')">×</button></div>
+    <p class="muted small-text">Ask about the current page. The interface is ready to connect to your own API route or AI provider.</p>
     <div class="form-stack">
-      <label class="form-label">
-        Optional API key
-        <input id="apiKey" type="password" placeholder="Use a backend proxy in production" />
-      </label>
-
-      <label class="form-label">
-        Your question
-        <textarea id="aiQuestion" placeholder="What is the main idea of this page?"></textarea>
-      </label>
-
+      <label class="form-label">Optional API key<input id="apiKey" type="password" placeholder="Use a backend proxy in production" /></label>
+      <label class="form-label">Your question<textarea id="aiQuestion" placeholder="What is the main idea of this page?"></textarea></label>
       <button class="primary-button full-width" onclick="askGuide()">Ask the guide</button>
       <div class="ai-answer" id="aiAnswer"></div>
     </div>
   </div>
 </div>
 
-<!-- Quiz Modal -->
 <div class="modal-backdrop" id="quizModal">
   <div class="modal">
-    <div class="modal-header">
-      <h2>Close with recall</h2>
-      <button class="close-button" onclick="closeModal('quizModal')">×</button>
-    </div>
-
-    <p class="muted small-text">
-      Retrieval practice helps turn reading into something you can use.
-    </p>
-
-    <div class="quiz-question">
-      According to the current chapter, what does meaningful work require?
-    </div>
-
-    <button class="quiz-option" onclick="answerQuiz(false)">
-      More notifications and faster switching
-    </button>
-
-    <button class="quiz-option" onclick="answerQuiz(true)">
-      Sustained attention and deliberate focus
-    </button>
-
-    <button class="quiz-option" onclick="answerQuiz(false)">
-      Reading as quickly as possible
-    </button>
-
+    <div class="modal-header"><h2>Close with recall</h2><button class="close-button" onclick="closeModal('quizModal')">×</button></div>
+    <p class="muted small-text">Retrieval practice helps turn reading into something you can use.</p>
+    <div class="quiz-question">According to the current chapter, what does meaningful work require?</div>
+    <button class="quiz-option" onclick="answerQuiz(false)">More notifications and faster switching</button>
+    <button class="quiz-option" onclick="answerQuiz(true)">Sustained attention and deliberate focus</button>
+    <button class="quiz-option" onclick="answerQuiz(false)">Reading as quickly as possible</button>
     <div class="quiz-result" id="quizResult"></div>
   </div>
 </div>
@@ -2769,113 +1650,80 @@ textarea {
 <script>
 const state = {
   activePage: "dashboard",
-  timerSeconds: 1500,
-  timerRunning: false,
-  timerInterval: null,
-  musicOn: false,
-  musicName: "Rain on windows",
-  pagesRead: 136,
-  weeklyGoal: 200,
-  streak: 7,
-  annotations: [
-    "Clarity about what deserves your attention."
-  ],
+  timerSeconds: 1500, timerRunning: false, timerInterval: null,
+  musicOn: false, musicName: "Rain on windows",
+  pagesRead: 136, weeklyGoal: 200, streak: 7,
+  annotations: ["Clarity about what deserves your attention."],
   uploadedBooks: [],
-  preferences: {
-    focusLength: 25,
-    readingTheme: "warm"
-  }
+  preferences: { focusLength: 25, readingTheme: "warm" }
 };
 
 const pageNames = {
-  dashboard: "Overview",
-  library: "My library",
-  reader: "Reading room",
-  rooms: "Study circles",
-  analytics: "Progress insights",
-  rewards: "Rewards",
-  settings: "Preferences"
+  dashboard: "Overview", library: "My library", reader: "Reading room",
+  rooms: "Study circles", analytics: "Progress insights", rewards: "Rewards", settings: "Preferences"
 };
 
 function saveState() {
   localStorage.setItem("leafline-state", JSON.stringify({
-    pagesRead: state.pagesRead,
-    weeklyGoal: state.weeklyGoal,
-    streak: state.streak,
-    annotations: state.annotations,
-    uploadedBooks: state.uploadedBooks,
-    preferences: state.preferences
+    pagesRead: state.pagesRead, weeklyGoal: state.weeklyGoal, streak: state.streak,
+    annotations: state.annotations, uploadedBooks: state.uploadedBooks, preferences: state.preferences
   }));
 }
 
 function restoreState() {
   const stored = localStorage.getItem("leafline-state");
-
-  if (!stored) {
-    return;
-  }
-
+  if (!stored) return;
   try {
-    const parsed = JSON.parse(stored);
-
+    const p = JSON.parse(stored);
     Object.assign(state, {
-      pagesRead: parsed.pagesRead ?? state.pagesRead,
-      weeklyGoal: parsed.weeklyGoal ?? state.weeklyGoal,
-      streak: parsed.streak ?? state.streak,
-      annotations: parsed.annotations ?? state.annotations,
-      uploadedBooks: parsed.uploadedBooks ?? state.uploadedBooks,
-      preferences: parsed.preferences ?? state.preferences
+      pagesRead: p.pagesRead ?? state.pagesRead, weeklyGoal: p.weeklyGoal ?? state.weeklyGoal,
+      streak: p.streak ?? state.streak, annotations: p.annotations ?? state.annotations,
+      uploadedBooks: p.uploadedBooks ?? state.uploadedBooks, preferences: p.preferences ?? state.preferences
     });
-  } catch {
-    localStorage.removeItem("leafline-state");
-  }
+  } catch { localStorage.removeItem("leafline-state"); }
 }
 
 function openPage(pageId) {
-  document.querySelectorAll(".page").forEach((page) => {
-    page.classList.toggle("active", page.id === pageId);
-  });
-
-  document.querySelectorAll(".nav-item").forEach((item) => {
-    item.classList.toggle("active", item.dataset.page === pageId);
-  });
-
+  document.querySelectorAll(".page").forEach(p => p.classList.toggle("active", p.id === pageId));
+  document.querySelectorAll(".nav-item").forEach(i => i.classList.toggle("active", i.dataset.page === pageId));
+  document.querySelectorAll(".bottom-nav-btn").forEach(b => b.classList.toggle("active", b.dataset.page === pageId));
   state.activePage = pageId;
   document.getElementById("breadcrumbText").textContent = pageNames[pageId];
   window.scrollTo({ top: 0, behavior: "smooth" });
+  closeMobileNavigation();
 }
 
 function toggleMobileNavigation() {
-  showToast("On mobile, use the page buttons in the desktop layout or connect this action to a drawer.");
+  const sidebar = document.getElementById("mainSidebar");
+  const overlay = document.getElementById("sidebarOverlay");
+  if (sidebar.classList.contains("open")) { closeMobileNavigation(); }
+  else { sidebar.classList.add("open"); overlay.classList.add("open"); document.body.style.overflow = "hidden"; }
 }
 
-function openModal(id) {
-  document.getElementById(id).classList.add("open");
+function closeMobileNavigation() {
+  const sidebar = document.getElementById("mainSidebar");
+  const overlay = document.getElementById("sidebarOverlay");
+  sidebar.classList.remove("open");
+  overlay.classList.remove("open");
+  document.body.style.overflow = "";
 }
 
-function closeModal(id) {
-  document.getElementById(id).classList.remove("open");
-}
+function openModal(id)  { document.getElementById(id).classList.add("open"); }
+function closeModal(id) { document.getElementById(id).classList.remove("open"); }
 
 function showToast(message) {
   const toast = document.getElementById("toast");
-
   toast.textContent = message;
   toast.classList.remove("show");
-
   void toast.offsetWidth;
-
   toast.classList.add("show");
 }
 
-function calculateWeeklyPercent() {
-  return Math.min(100, Math.round((state.pagesRead / state.weeklyGoal) * 100));
-}
+function calculateWeeklyPercent() { return Math.min(100, Math.round((state.pagesRead / state.weeklyGoal) * 100)); }
 
 function updateDashboardStats() {
   const percent = calculateWeeklyPercent();
   const remaining = Math.max(0, state.weeklyGoal - state.pagesRead);
-
   document.getElementById("pagesRead").textContent = state.pagesRead;
   document.getElementById("analyticsPages").textContent = state.pagesRead;
   document.getElementById("weeklyPercent").textContent = `${percent}%`;
@@ -2888,85 +1736,41 @@ function updateDashboardStats() {
 function renderAnnotations() {
   const list = document.getElementById("noteList");
   const count = document.getElementById("annotationCount");
-
   list.innerHTML = "";
-
-  state.annotations.forEach((annotation) => {
+  state.annotations.forEach(a => {
     const note = document.createElement("div");
-    note.className = "note";
-    note.textContent = annotation;
+    note.className = "note"; note.textContent = a;
     list.appendChild(note);
   });
-
   count.textContent = state.annotations.length;
 }
 
 function renderUploadedBooks() {
   const library = document.getElementById("libraryBooks");
-
-  state.uploadedBooks.forEach((book) => {
+  state.uploadedBooks.forEach(book => {
     const article = document.createElement("article");
-
     article.className = "book-card card uploaded-book";
-    article.dataset.title = book.name;
-    article.dataset.progress = "0";
-
-    article.innerHTML = `
-      <div class="book-main">
-        <div class="book-cover cover-purple">PDF<br />BOOK</div>
-        <div>
-          <div class="book-title">${escapeHTML(book.name)}</div>
-          <div class="book-author">Imported locally</div>
-          <div class="book-author">Ready to read</div>
-        </div>
-      </div>
-      <div class="book-progress">
-        <div class="progress-label">
-          <span>Not started</span>
-          <span>0%</span>
-        </div>
-        <div class="progress-track">
-          <span class="progress-fill" style="width:2%"></span>
-        </div>
-      </div>
-      <div class="book-footer">
-        <span class="tag">New book</span>
-        <button class="ghost-button" onclick="openPage('reader')">Open →</button>
-      </div>
-    `;
-
+    article.dataset.title = book.name; article.dataset.progress = "0";
+    article.innerHTML = `<div class="book-main"><div class="book-cover cover-purple">PDF<br />BOOK</div><div><div class="book-title">${escapeHTML(book.name)}</div><div class="book-author">Imported locally</div><div class="book-author">Ready to read</div></div></div><div class="book-progress"><div class="progress-label"><span>Not started</span><span>0%</span></div><div class="progress-track"><span class="progress-fill" style="width:2%"></span></div></div><div class="book-footer"><span class="tag">New book</span><button class="ghost-button" onclick="openPage('reader')">Open →</button></div>`;
     library.appendChild(article);
   });
 }
 
-function escapeHTML(value) {
-  return String(value)
-    .replaceAll("&", "&amp;")
-    .replaceAll("<", "&lt;")
-    .replaceAll(">", "&gt;")
-    .replaceAll('"', "&quot;")
-    .replaceAll("'", "&#039;");
+function escapeHTML(v) {
+  return String(v).replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;").replaceAll('"',"&quot;").replaceAll("'","&#039;");
 }
 
 function toggleTimer() {
   const timerButton = document.getElementById("timerButton");
   const timerStatus = document.getElementById("timerStatus");
-
   state.timerRunning = !state.timerRunning;
-
   if (state.timerRunning) {
     timerButton.textContent = "Pause session";
     timerStatus.textContent = "You are in a focused reading session.";
-
     state.timerInterval = setInterval(() => {
-      if (state.timerSeconds > 0) {
-        state.timerSeconds -= 1;
-        renderTimer();
-      }
-
+      if (state.timerSeconds > 0) { state.timerSeconds -= 1; renderTimer(); }
       if (state.timerSeconds === 0) {
-        clearInterval(state.timerInterval);
-        state.timerRunning = false;
+        clearInterval(state.timerInterval); state.timerRunning = false;
         timerButton.textContent = "Session complete";
         timerStatus.textContent = "Beautiful work. Take a moment to reflect.";
         openModal("quizModal");
@@ -2980,10 +1784,9 @@ function toggleTimer() {
 }
 
 function renderTimer() {
-  const minutes = String(Math.floor(state.timerSeconds / 60)).padStart(2, "0");
-  const seconds = String(state.timerSeconds % 60).padStart(2, "0");
-
-  document.getElementById("timerDisplay").textContent = `${minutes}:${seconds}`;
+  const m = String(Math.floor(state.timerSeconds / 60)).padStart(2,"0");
+  const s = String(state.timerSeconds % 60).padStart(2,"0");
+  document.getElementById("timerDisplay").textContent = `${m}:${s}`;
 }
 
 function resetTimer() {
@@ -2991,94 +1794,60 @@ function resetTimer() {
   state.timerSeconds = Number(state.preferences.focusLength || 25) * 60;
   state.timerRunning = false;
   renderTimer();
-
   document.getElementById("timerButton").textContent = "Start session";
   document.getElementById("timerStatus").textContent = "Ready when you are.";
 }
 
 function completePage() {
-  state.pagesRead += 1;
-  saveState();
-  updateDashboardStats();
-
+  state.pagesRead += 1; saveState(); updateDashboardStats();
   showToast("Page completed. +12 XP earned. Your progress is updated.");
 }
 
 function highlightSelection() {
   const selection = window.getSelection()?.toString().trim();
-
-  if (!selection) {
-    showToast("Select some text in the document first.");
-    return;
-  }
-
+  if (!selection) { showToast("Select some text in the document first."); return; }
   const input = document.getElementById("annotationInput");
-  input.value = selection;
-  input.focus();
+  input.value = selection; input.focus();
   showToast("Selection added to your annotation.");
 }
 
-function focusAnnotation() {
-  document.getElementById("annotationInput").focus();
-}
+function focusAnnotation() { document.getElementById("annotationInput").focus(); }
 
 function saveAnnotation() {
   const input = document.getElementById("annotationInput");
   const value = input.value.trim();
-
-  if (!value) {
-    showToast("Write a thought before saving.");
-    input.focus();
-    return;
-  }
-
-  state.annotations.push(value);
-  input.value = "";
-  saveState();
-  renderAnnotations();
+  if (!value) { showToast("Write a thought before saving."); input.focus(); return; }
+  state.annotations.push(value); input.value = "";
+  saveState(); renderAnnotations();
   showToast("Annotation saved to this book.");
 }
 
 function toggleMusic() {
   state.musicOn = !state.musicOn;
-
   const toggle = document.getElementById("musicToggle");
   const status = document.getElementById("musicStatus");
-
   toggle.classList.toggle("on", state.musicOn);
   status.textContent = state.musicOn ? "Background sound playing" : "Background sound off";
-
   showToast(state.musicOn ? `${state.musicName} enabled.` : "Focus atmosphere paused.");
 }
 
 function changeSound(name) {
   state.musicName = name;
   document.getElementById("musicName").textContent = name;
-
-  if (!state.musicOn) {
-    state.musicOn = true;
-    document.getElementById("musicToggle").classList.add("on");
-  }
-
+  if (!state.musicOn) { state.musicOn = true; document.getElementById("musicToggle").classList.add("on"); }
   document.getElementById("musicStatus").textContent = "Background sound playing";
   showToast(`${name} selected.`);
 }
 
 function joinRoom(button) {
   button.textContent = "Joined";
-  button.classList.remove("primary-button");
-  button.classList.add("secondary-button");
-
+  button.classList.remove("primary-button"); button.classList.add("secondary-button");
   showToast("You joined the study circle.");
 }
 
 function copyInvite() {
   const value = document.getElementById("inviteInput").value;
-
-  if (navigator.clipboard) {
-    navigator.clipboard.writeText(value);
-  }
-
+  if (navigator.clipboard) navigator.clipboard.writeText(value);
   showToast("Study circle invite copied.");
 }
 
@@ -3086,64 +1855,30 @@ function createRoom() {
   const name = document.getElementById("roomName").value.trim() || "My reading circle";
   const length = document.getElementById("roomLength").value;
   const intention = document.getElementById("roomIntention").value.trim();
-
-  closeModal("roomModal");
-  openPage("rooms");
-
+  closeModal("roomModal"); openPage("rooms");
   showToast(`${name} created for ${length}. Invite link copied.`);
-  console.log({
-    roomName: name,
-    sessionLength: length,
-    intention
-  });
 }
 
 function uploadBook() {
   const fileInput = document.getElementById("pdfFile");
   const file = fileInput.files[0];
-
-  if (!file) {
-    showToast("Choose a PDF first.");
-    return;
-  }
-
-  state.uploadedBooks.push({
-    name: file.name,
-    importedAt: new Date().toISOString()
-  });
-
-  saveState();
-  renderUploadedBooks();
-  closeModal("uploadModal");
-  openPage("library");
-  showToast(`${file.name} was added to your library.`);
-  fileInput.value = "";
+  if (!file) { showToast("Choose a PDF first."); return; }
+  state.uploadedBooks.push({ name: file.name, importedAt: new Date().toISOString() });
+  saveState(); renderUploadedBooks(); closeModal("uploadModal"); openPage("library");
+  showToast(`${file.name} was added to your library.`); fileInput.value = "";
 }
 
 function askGuide() {
   const question = document.getElementById("aiQuestion").value.trim();
   const answer = document.getElementById("aiAnswer");
-
-  if (!question) {
-    answer.style.display = "block";
-    answer.textContent = "Ask a question about the current page first.";
-    return;
-  }
-
+  if (!question) { answer.style.display = "block"; answer.textContent = "Ask a question about the current page first."; return; }
   answer.style.display = "block";
-  answer.innerHTML = `
-    <strong>Guide response</strong><br />
-    The central idea is that meaningful reading requires protected attention.
-    Try explaining the idea in your own words, then connect it to one decision
-    you are making in your current work or study.
-  `;
-
+  answer.innerHTML = `<strong>Guide response</strong><br />The central idea is that meaningful reading requires protected attention. Try explaining the idea in your own words, then connect it to one decision you are making in your current work or study.`;
   showToast("AI guide response generated.");
 }
 
 function answerQuiz(correct) {
   const result = document.getElementById("quizResult");
-
   if (correct) {
     result.style.color = "var(--forest-2)";
     result.textContent = "Correct. +25 XP earned. The idea is now more likely to stick.";
@@ -3155,114 +1890,57 @@ function answerQuiz(correct) {
 }
 
 function searchLibrary(query) {
-  const normalizedQuery = query.toLowerCase().trim();
-
-  document.querySelectorAll("[data-title]").forEach((book) => {
-    const title = book.dataset.title.toLowerCase();
-    book.style.display = !normalizedQuery || title.includes(normalizedQuery) ? "" : "none";
+  const q = query.toLowerCase().trim();
+  document.querySelectorAll("[data-title]").forEach(book => {
+    book.style.display = !q || book.dataset.title.toLowerCase().includes(q) ? "" : "none";
   });
-
-  if (normalizedQuery) {
-    openPage("library");
-  }
+  if (q) openPage("library");
 }
 
 function sortBooks(order) {
   const library = document.getElementById("libraryBooks");
   const books = [...library.querySelectorAll(".book-card")];
-
-  books.sort((a, b) => {
-    if (order === "title") {
-      return a.dataset.title.localeCompare(b.dataset.title);
-    }
-
-    if (order === "progress") {
-      return Number(b.dataset.progress || 0) - Number(a.dataset.progress || 0);
-    }
-
+  books.sort((a,b) => {
+    if (order === "title")    return a.dataset.title.localeCompare(b.dataset.title);
+    if (order === "progress") return Number(b.dataset.progress||0) - Number(a.dataset.progress||0);
     return 0;
   });
-
-  books.forEach((book) => library.appendChild(book));
+  books.forEach(b => library.appendChild(b));
 }
 
 function savePreferences() {
   state.preferences.focusLength = Number(document.getElementById("focusLength").value);
   state.preferences.readingTheme = document.getElementById("readingTheme").value;
   state.weeklyGoal = Number(document.getElementById("pageGoal").value) || 200;
-
-  resetTimer();
-  saveState();
-  updateDashboardStats();
+  resetTimer(); saveState(); updateDashboardStats();
   showToast("Preferences saved.");
 }
 
 function exportData() {
-  const data = {
-    exportedAt: new Date().toISOString(),
-    pagesRead: state.pagesRead,
-    weeklyGoal: state.weeklyGoal,
-    streak: state.streak,
-    annotations: state.annotations,
-    uploadedBooks: state.uploadedBooks,
-    preferences: state.preferences
-  };
-
-  const blob = new Blob([JSON.stringify(data, null, 2)], {
-    type: "application/json"
-  });
-
+  const data = { exportedAt: new Date().toISOString(), pagesRead: state.pagesRead, weeklyGoal: state.weeklyGoal, streak: state.streak, annotations: state.annotations, uploadedBooks: state.uploadedBooks, preferences: state.preferences };
+  const blob = new Blob([JSON.stringify(data,null,2)], { type: "application/json" });
   const url = URL.createObjectURL(blob);
   const link = document.createElement("a");
-
-  link.href = url;
-  link.download = "leafline-reading-data.json";
-  link.click();
-
+  link.href = url; link.download = "leafline-reading-data.json"; link.click();
   URL.revokeObjectURL(url);
   showToast("Your local reading data was exported.");
 }
 
 function clearLocalData() {
-  const confirmed = confirm("Clear locally saved annotations, progress, and preferences?");
-
-  if (!confirmed) {
-    return;
-  }
-
-  localStorage.removeItem("leafline-state");
-  location.reload();
+  if (!confirm("Clear locally saved annotations, progress, and preferences?")) return;
+  localStorage.removeItem("leafline-state"); location.reload();
 }
 
-document.querySelectorAll(".nav-item").forEach((item) => {
-  item.addEventListener("click", () => openPage(item.dataset.page));
-});
+document.querySelectorAll(".nav-item").forEach(item => item.addEventListener("click", () => openPage(item.dataset.page)));
+document.querySelectorAll(".bottom-nav-btn").forEach(btn => btn.addEventListener("click", () => openPage(btn.dataset.page)));
+document.querySelectorAll(".modal-backdrop").forEach(backdrop => backdrop.addEventListener("click", e => { if (e.target === backdrop) backdrop.classList.remove("open"); }));
 
-document.querySelectorAll(".modal-backdrop").forEach((backdrop) => {
-  backdrop.addEventListener("click", (event) => {
-    if (event.target === backdrop) {
-      backdrop.classList.remove("open");
-    }
-  });
-});
-
-document.addEventListener("keydown", (event) => {
-  const activeTag = document.activeElement?.tagName;
-
-  if (
-    event.code === "Space" &&
-    activeTag !== "INPUT" &&
-    activeTag !== "TEXTAREA" &&
-    activeTag !== "SELECT"
-  ) {
-    event.preventDefault();
-    toggleTimer();
-  }
-
-  if (event.key === "Escape") {
-    document.querySelectorAll(".modal-backdrop.open").forEach((modal) => {
-      modal.classList.remove("open");
-    });
+document.addEventListener("keydown", e => {
+  const tag = document.activeElement?.tagName;
+  if (e.code === "Space" && tag !== "INPUT" && tag !== "TEXTAREA" && tag !== "SELECT") { e.preventDefault(); toggleTimer(); }
+  if (e.key === "Escape") {
+    document.querySelectorAll(".modal-backdrop.open").forEach(m => m.classList.remove("open"));
+    closeMobileNavigation();
   }
 });
 
@@ -3270,7 +1948,6 @@ restoreState();
 updateDashboardStats();
 renderAnnotations();
 renderUploadedBooks();
-
 document.getElementById("focusLength").value = state.preferences.focusLength;
 document.getElementById("readingTheme").value = state.preferences.readingTheme;
 document.getElementById("pageGoal").value = state.weeklyGoal;
