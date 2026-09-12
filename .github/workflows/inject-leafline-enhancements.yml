@@ -6,6 +6,7 @@ on:
       - 'leafline-performance.js'
       - 'leafline-audio.js'
       - 'leafline-ai.js'
+      - 'leafline-auth-fix.js'
       - 'index.html'
 permissions:
   contents: write
@@ -20,8 +21,13 @@ jobs:
           from pathlib import Path
           p=Path('index.html')
           s=p.read_text()
-          tags='''<script src="supabase.js"></script>\n<script src="leafline-performance.js"></script>\n<script src="leafline-audio.js"></script>\n<script src="leafline-ai.js"></script>'''
-          s=s.replace('<script src="supabase.js"></script>\n<script src="leafline-performance.js"></script>\n<script src="leafline-audio.js"></script>\n<script src="leafline-ai.js"></script>','')
+          tags='''<script src="supabase.js"></script>
+<script src="leafline-performance.js"></script>
+<script src="leafline-audio.js"></script>
+<script src="leafline-ai.js"></script>
+<script src="leafline-auth-fix.js"></script>'''
+          for tag in tags.splitlines():
+              s=s.replace(tag+'\n','')
           marker='</head>'
           if marker not in s: raise SystemExit('head marker missing')
           s=s.replace(marker,tags+'\n'+marker,1)
