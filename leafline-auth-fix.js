@@ -1,6 +1,7 @@
 /* Leafline authentication hardening: email confirmation + clean redirect. */
 (function(){
   'use strict';
+  // Supabase email confirmation is intentionally handled server-side; no credential is stored in this repo.
   const REDIRECT=()=>location.origin+location.pathname;
   function toastSafe(m){if(typeof window.toast==='function')window.toast(m);else alert(m)}
   function install(){
