@@ -1,0 +1,30 @@
+name: Leafline enhancement loader
+on: push
+permissions:
+  contents: write
+jobs:
+  inject:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Inject enhancement scripts
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          import re
+          p=Path('index.html')
+          s=p.read_text()
+          names=['supabase.js','leafline-performance.js','leafline-audio.js','leafline-ai.js','leafline-auth-fix.js']
+          for n in names:
+              s=re.sub(r'<script[^>]+src=["\\\']'+re.escape(n)+r'["\\\'][^>]*></script>\\s*','',s)
+          tags='\\n'.join('<script src="'+n+'"></script>' for n in names)
+          s=s.replace('</head>',tags+'\\n</head>',1)
+          p.write_text(s)
+          PY
+      - name: Commit
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add index.html
+          git diff --cached --quiet || git commit -m 'Load Leafline enhancements'
+          git push
