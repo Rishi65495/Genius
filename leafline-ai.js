@@ -4,12 +4,18 @@
   const SUPABASE_URL='https://hnrxozghykcmfoozbeii.supabase.co';
   let panel,history=[],contextCache=new Map(),selectedBookId=null;
   function books(){try{return JSON.parse(localStorage.getItem('ll-books')||'[]').filter(b=>!b.isDemo)}catch(e){return[]}}
-  function activeBook(){const s=window.S;const candidates=[s?.currentBook,s?.activeBook,s?.readingBook,s?.openBook,s?.book];for(const x of candidates)if(x?.id)return x;const el=document.querySelector('[data-book-id],[data-current-book-id]');const id=el?.dataset.bookId||el?.dataset.currentBookId;if(id)return books().find(b=>String(b.id)===String(id));return null}
+  function activeBook(){
+    const s=window.S;
+    const readerId=window.R?.bookId;
+    if(readerId){const b=books().find(x=>String(x.id)===String(readerId));if(b)return b}
+    const candidates=[s?.currentBook,s?.activeBook,s?.readingBook,s?.openBook,s?.book];
+    for(const x of candidates)if(x?.id)return x;
+    const el=document.querySelector('[data-book-id],[data-current-book-id]');const id=el?.dataset.bookId||el?.dataset.currentBookId;
+    return id?books().find(b=>String(b.id)===String(id)):null;
+  }
   async function getPdfBytes(id){
-    if(typeof window.idbGet==='function'){
-      for(const store of ['pdfs','books','pdf']){try{const v=await window.idbGet(store,id);if(v instanceof Blob)return new Uint8Array(await v.arrayBuffer());if(v?.data instanceof Blob)return new Uint8Array(await v.data.arrayBuffer());if(v?.data instanceof ArrayBuffer)return new Uint8Array(v.data);if(v instanceof ArrayBuffer)return new Uint8Array(v)}catch(e){}}
-    }
-    // Last-resort IndexedDB discovery for the app's local PDF store.
+    if(typeof window.idbGet!=='function')return null;
+    try{const rec=await window.idbGet('pdfs',id);if(rec?.data instanceof ArrayBuffer)return new Uint8Array(rec.data);if(rec?.data?.buffer instanceof ArrayBuffer)return new Uint8Array(rec.data.buffer);if(rec?.data instanceof Blob)return new Uint8Array(await rec.data.arrayBuffer());}catch(e){console.warn('AI PDF read',e)}
     return null;
   }
   async function extractBook(book){
