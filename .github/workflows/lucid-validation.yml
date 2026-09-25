@@ -1,0 +1,22 @@
+name: Lucid validation
+on:
+  push:
+    branches: ["main","lucid-v1-implementation"]
+  pull_request:
+    branches: ["main"]
+jobs:
+  syntax:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+      - name: Check JavaScript syntax
+        run: |
+          node --check lucid-platform.js
+          node --check leafline-ai.js
+          node --check leafline-audio.js
+          node --check leafline-auth-fix.js
+          node --check leafline-performance.js
+          node --check supabase.js
