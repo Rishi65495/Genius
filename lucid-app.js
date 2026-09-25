@@ -155,12 +155,14 @@ async function startVideoSession(r,title){
  const spd=Number(localStorage.getItem('lucid-video-speed')||1);
  const {data:s}=await sb().from('video_sessions').insert({user_id:uid(),resource_id:r.id,catalogue_id:state.currentCat?.id||null,playback_speed:spd}).select().single();
  state.video.sessionId=s?.id;setVideoSpeed(spd);
- const idx=state.video.player?.getPlaylistIndex?.()??Number(r.metadata?.playlist_index||0);
- const key='video:'+idx;
- const prior=(await sb().from('resource_item_progress').select('position,speed,completed').eq('resource_id',r.id).eq('user_id',uid()).eq('item_key',key).maybeSingle()).data;
+ const initialIdx=state.video.player?.getPlaylistIndex?.()??Number(r.metadata?.playlist_index||0);
+ const initialKey='video:'+initialIdx;
+ const prior=(await sb().from('resource_item_progress').select('position,speed,completed').eq('resource_id',r.id).eq('user_id',uid()).eq('item_key',initialKey).maybeSingle()).data;
  if(prior?.position&&Number(prior.position)>3&&state.video.player?.seekTo)state.video.player.seekTo(Number(prior.position),true);
  clearInterval(state.video.timer);state.video.timer=setInterval(async()=>{
    if(!state.video.player?.getCurrentTime||!state.video.sessionId)return;
+   const idx=state.video.player?.getPlaylistIndex?.()??initialIdx;
+   const key='video:'+idx;
    const t=state.video.player.getCurrentTime(),speed=state.video.player.getPlaybackRate?.()||spd;
    state.video.lastTime=t;state.video.speed=speed;
    await sb().from('video_sessions').update({last_timestamp_seconds:t,playback_speed:speed,active_seconds:Math.round(t)}).eq('id',state.video.sessionId);
