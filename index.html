@@ -5,12 +5,12 @@
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,maximum-scale=5"/>
 <meta name="theme-color" content="#17251d"/>
-<meta name="description" content="Leafline — Immersive Reading Studio, PDF Reader & Productivity Suite"/>
+<meta name="description" content="Lucid — AI-powered focused, measurable and collaborative learning."/>
 <meta name="mobile-web-app-capable" content="yes"/>
 <meta name="apple-mobile-web-app-capable" content="yes"/>
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
 <link rel="manifest" href="manifest.json"/>
-<title>Leafline | Reading Studio</title>
+<title>Lucid | AI Learning OS</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600;9..40,700&family=DM+Serif+Display:ital@0;1&family=Space+Mono:wght@400;700&display=swap');
@@ -2595,5 +2595,7 @@ document.addEventListener('keydown',e=>{
   console.log('%cAll systems ready.', 'color:#3b7957');
 })();
 </script>
+<script src="lucid-platform.js"></script>
+<script>if("serviceWorker" in navigator){window.addEventListener("load",()=>navigator.serviceWorker.register("./service-worker.js").catch(()=>{}));}</script>
 </body>
 </html>
