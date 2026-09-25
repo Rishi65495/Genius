@@ -55,9 +55,71 @@ function tickFocus(){const f=state.focus;if(!f)return;const n=Date.now(),d=Math.
 async function endFocus(){const f=state.focus;if(!f)return;clearInterval(f.timer);document.removeEventListener('visibilitychange',focusVisibility);state.focus=null;await sb().from('reading_sessions').update({ended_at:nowIso(),active_seconds:f.active,result:{idle_seconds:f.idle,objective:f.obj}}).eq('id',f.sessionId);await track('focus_completed',{active_seconds:f.active,idle_seconds:f.idle,planned_seconds:f.planned,objective:f.obj},f.resourceId,f.catId,f.sessionId);if(f.active>=Math.max(300,f.planned*.5))await award('focus_completed',f.sessionId);if(f.roomId)await sb().from('room_events').insert({room_id:f.roomId,user_id:uid(),event_type:'room_focus_completed',payload:{active_seconds:f.active}});$('focusState').textContent='Ended · '+fmtMinutes(f.active)+' active · '+fmtMinutes(f.idle)+' idle';toast('Focus complete ✓')}
 /* YouTube */
 function parseYT(url){try{const u=new URL(url);return{video:u.searchParams.get('v')||(u.hostname==='youtu.be'?u.pathname.slice(1):null),list:u.searchParams.get('list')||null}}catch{return{}}}
-async function importYouTube(){if(!signedIn()){toast('Sign in first.');return}const url=$('youtubeUrl').value.trim(),ids=parseYT(url);if(!ids.video&&!ids.list){toast('Invalid YouTube URL');return}let meta=null;try{const s=(await sb().auth.getSession()).data.session,r=await fetch(C.SUPABASE_URL+'/functions/v1/youtube-import',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+s.access_token,'apikey':C.SUPABASE_KEY},body:JSON.stringify({url})});if(r.ok)meta=await r.json()}catch(e){}const title=meta?.item?.snippet?.title||meta?.playlist?.snippet?.title||(ids.list?'YouTube Playlist':'YouTube Lesson');try{const r=await sb().from('lucid_resources').insert({owner_id:uid(),type:ids.list?'playlist':'video',title,source_url:url,metadata:{youtube_video_id:ids.video,youtube_playlist_id:ids.list}}).select().single();if(r.error)throw r.error;await sb().from('resource_videos').insert({resource_id:r.data.id,youtube_video_id:ids.video||null,youtube_playlist_id:ids.list||null,metadata:{source_url:url}});const cat=state.currentCat||await defaultCatalogue();await sb().from('catalogue_resources').upsert({catalogue_id:cat.id,resource_id:r.data.id,order_index:999},{onConflict:'catalogue_id,resource_id'});await sb().from('learning_journeys').upsert({owner_id:uid(),catalogue_id:cat.id,resource_id:r.data.id,position:{video_index:0,timestamp:0,speed:Number(localStorage.getItem('lucid-video-speed')||1)},completion:0,last_activity_at:nowIso()},{onConflict:'owner_id,catalogue_id,resource_id'});state.current=r.data;state.currentCat=cat;closeModal('videoModal');await renderLibrary();setPage('video');loadVideo(r.data,ids.video,ids.list,title);toast('YouTube lesson imported ✓')}catch(e){toast('YouTube import failed: '+e.message)}}
-function loadVideo(r,video,list,title){if(typeof YT==='undefined'||!YT.Player){setTimeout(()=>loadVideo(r,video,list,title),400);return}if(state.video.player)try{state.video.player.destroy()}catch(e){}const v={playsinline:1,rel:0,origin:location.origin,enablejsapi:1};if(list){v.listType='playlist';v.list=list}state.video.player=new YT.Player('videoFrame',{videoId:video||undefined,playerVars:v,events:{onReady:()=>startVideoSession(r,title),onStateChange:e=>{if(e.data===YT.PlayerState.ENDED)finishVideo(true)}}})}
-async function startVideoSession(r,title){state.current=r;state.video.resource=r;$('videoTitle').textContent=title||r.title;const {data:s}=await sb().from('video_sessions').insert({user_id:uid(),resource_id:r.id,catalogue_id:state.currentCat?.id||null,playback_speed:Number(localStorage.getItem('lucid-video-speed')||1)}).select().single();state.video.sessionId=s?.id;setVideoSpeed(Number(localStorage.getItem('lucid-video-speed')||1));clearInterval(state.video.timer);state.video.timer=setInterval(async()=>{if(!state.video.player?.getCurrentTime)return;const t=state.video.player.getCurrentTime(),speed=state.video.player.getPlaybackRate?.()||1;state.video.lastTime=t;state.video.speed=speed;await sb().from('video_sessions').update({last_timestamp_seconds:t,playback_speed:speed,active_seconds:Math.round(t)}).eq('id',state.video.sessionId);const idx=state.video.player.getPlaylistIndex?.()??0;await sb().from('resource_item_progress').upsert({resource_id:r.id,user_id:uid(),item_key:'video:'+idx,position:t,speed,completed:false,last_activity_at:nowIso()},{onConflict:'resource_id,user_id,item_key'});await track('video_progress',{timestamp_seconds:t,playback_speed:speed,video_index:idx},r.id,state.currentCat?.id)},15000)}
+async function importYouTube(){
+ if(!signedIn()){toast('Sign in first.');return}
+ const url=$('youtubeUrl').value.trim(),ids=parseYT(url);if(!ids.video&&!ids.list){toast('Invalid YouTube URL');return}
+ let meta=null;
+ try{
+  const sess=(await sb().auth.getSession()).data.session;
+  const resp=await fetch(C.SUPABASE_URL+'/functions/v1/youtube-import',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+sess.access_token,'apikey':C.SUPABASE_KEY},body:JSON.stringify({url})});
+  if(resp.ok)meta=await resp.json();
+ }catch(e){console.warn('YouTube metadata',e)}
+ if(!meta&&ids.video)try{const o=await fetch('https://www.youtube.com/oembed?url='+encodeURIComponent(url)+'&format=json');if(o.ok){const x=await o.json();meta={item:{snippet:{title:x.title,channelTitle:x.author_name,thumbnails:{high:{url:x.thumbnail_url}}}}}}catch(e){}
+ const title=meta?.item?.snippet?.title||meta?.playlist?.snippet?.title||(ids.list?'YouTube Playlist':'YouTube Lesson');
+ try{
+  const {data:r,error}=await sb().from('lucid_resources').insert({owner_id:uid(),type:ids.list?'playlist':'video',title,source_url:url,metadata:{youtube_video_id:ids.video,youtube_playlist_id:ids.list,channel_title:meta?.item?.snippet?.channelTitle||meta?.playlist?.snippet?.channelTitle||null}}).select().single();
+  if(error)throw error;
+  await sb().from('resource_videos').insert({resource_id:r.id,youtube_video_id:ids.video||null,youtube_playlist_id:ids.list||null,metadata:{source_url:url}});
+  const cat=state.currentCat||await defaultCatalogue();
+  await sb().from('catalogue_resources').upsert({catalogue_id:cat.id,resource_id:r.id,order_index:999},{onConflict:'catalogue_id,resource_id'});
+  await sb().from('learning_journeys').upsert({owner_id:uid(),catalogue_id:cat.id,resource_id:r.id,position:{video_index:0,timestamp:0,speed:Number(localStorage.getItem('lucid-video-speed')||1)},completion:0,last_activity_at:nowIso()},{onConflict:'owner_id,catalogue_id,resource_id'});
+  if(ids.list&&Array.isArray(meta?.items)){
+    const items=meta.items.slice(0,100);
+    for(let i=0;i<items.length;i++){
+      const it=items[i],vid=it.contentDetails?.videoId||it.snippet?.resourceId?.videoId;
+      if(!vid)continue;
+      const child=(await sb().from('lucid_resources').select('id').eq('owner_id',uid()).eq('local_reference','yt:'+ids.list+':'+vid).maybeSingle()).data;
+      let childId=child?.id;
+      if(!childId){
+        const ins=await sb().from('lucid_resources').insert({owner_id:uid(),type:'video',title:it.snippet?.title||('Playlist item '+(i+1)),source_url:'https://www.youtube.com/watch?v='+vid,local_reference:'yt:'+ids.list+':'+vid,metadata:{youtube_video_id:vid,youtube_playlist_id:ids.list,playlist_index:i}}).select().single();
+        childId=ins.data?.id;
+        if(childId)await sb().from('resource_videos').insert({resource_id:childId,youtube_video_id:vid,youtube_playlist_id:ids.list,metadata:{playlist_index:i}});
+      }
+      if(childId){
+        await sb().from('catalogue_resources').upsert({catalogue_id:cat.id,resource_id:childId,order_index:1000+i},{onConflict:'catalogue_id,resource_id'});
+        await sb().from('learning_journeys').upsert({owner_id:uid(),catalogue_id:cat.id,resource_id:childId,position:{video_index:i,timestamp:0,speed:1},completion:0,last_activity_at:nowIso()},{onConflict:'owner_id,catalogue_id,resource_id'});
+      }
+    }
+  }
+  state.current=r;state.currentCat=cat;closeModal('videoModal');await renderLibrary();setPage('video');loadVideo(r,ids.video,ids.list,title);toast(ids.list?(meta?.items?.length?'Playlist imported · '+Math.min(100,meta.items.length)+' lessons ready ✓':'Playlist shell created · add YOUTUBE_API_KEY for metadata'):'YouTube lesson imported ✓');
+ }catch(e){toast('YouTube import failed: '+e.message)}
+}
+function loadVideo(r,video,list,title){
+ if(typeof YT==='undefined'||!YT.Player){setTimeout(()=>loadVideo(r,video,list,title),400);return}
+ if(state.video.player)try{state.video.player.destroy()}catch(e){}
+ const v={playsinline:1,rel:0,origin:location.origin,enablejsapi:1};
+ if(list){v.listType='playlist';v.list=list}
+ state.video.player=new YT.Player('videoFrame',{videoId:video||undefined,playerVars:v,events:{onReady:()=>startVideoSession(r,title),onStateChange:e=>{if(e.data===YT.PlayerState.ENDED)finishVideo(true)}}});
+}
+async function startVideoSession(r,title){
+ state.current=r;state.video.resource=r;$('videoTitle').textContent=title||r.title;
+ const spd=Number(localStorage.getItem('lucid-video-speed')||1);
+ const {data:s}=await sb().from('video_sessions').insert({user_id:uid(),resource_id:r.id,catalogue_id:state.currentCat?.id||null,playback_speed:spd}).select().single();
+ state.video.sessionId=s?.id;setVideoSpeed(spd);
+ const idx=state.video.player?.getPlaylistIndex?.()??Number(r.metadata?.playlist_index||0);
+ const key='video:'+idx;
+ const prior=(await sb().from('resource_item_progress').select('position,speed,completed').eq('resource_id',r.id).eq('user_id',uid()).eq('item_key',key).maybeSingle()).data;
+ if(prior?.position&&Number(prior.position)>3&&state.video.player?.seekTo)state.video.player.seekTo(Number(prior.position),true);
+ clearInterval(state.video.timer);state.video.timer=setInterval(async()=>{
+   if(!state.video.player?.getCurrentTime||!state.video.sessionId)return;
+   const t=state.video.player.getCurrentTime(),speed=state.video.player.getPlaybackRate?.()||spd;
+   state.video.lastTime=t;state.video.speed=speed;
+   await sb().from('video_sessions').update({last_timestamp_seconds:t,playback_speed:speed,active_seconds:Math.round(t)}).eq('id',state.video.sessionId);
+   await sb().from('resource_item_progress').upsert({resource_id:r.id,user_id:uid(),item_key:key,position:t,speed,completed:false,last_activity_at:nowIso(),metadata:{video_index:idx}},{onConflict:'resource_id,user_id,item_key'});
+   if(state.journey?.id)await sb().from('learning_journeys').update({position:{video_index:idx,timestamp:t,speed},last_activity_at:nowIso()}).eq('id',state.journey.id);
+   await track('video_progress',{timestamp_seconds:t,playback_speed:speed,video_index:idx},r.id,state.currentCat?.id);
+ },15000);
+}
 async function finishVideo(done){if(!state.video.sessionId)return;clearInterval(state.video.timer);await sb().from('video_sessions').update({ended_at:nowIso(),last_timestamp_seconds:state.video.lastTime,playback_speed:state.video.speed,completed:done}).eq('id',state.video.sessionId);await track(done?'video_completed':'video_session_ended',{timestamp_seconds:state.video.lastTime},state.video.resource?.id,state.currentCat?.id);if(done)await award('resource_completed',state.video.resource?.id)}
 function setVideoSpeed(s){state.video.speed=s;if(state.video.player?.setPlaybackRate)state.video.player.setPlaybackRate(s);if($('videoSpeed'))$('videoSpeed').textContent=s+'×';localStorage.setItem('lucid-video-speed',s);track('speed_changed',{speed:s},state.current?.id,state.currentCat?.id)}
 function videoSeek(s){if(state.video.player?.getCurrentTime)state.video.player.seekTo(Math.max(0,state.video.player.getCurrentTime()+s),true)}
