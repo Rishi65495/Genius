@@ -315,7 +315,7 @@ function buildDOM(){
     '<section id="page-video" class="page"><div class="page-head"><div><div class="eyebrow">VIDEO CLASSROOM</div><h1>Study the lesson.</h1><p class="small muted">Official YouTube player · progress · notes · speed memory.</p></div></div><div class="video-layout"><div><div class="video-frame"><div id="videoFrame"></div></div><div class="card" style="margin-top:10px"><div class="row"><h3 id="videoTitle">Video</h3><span id="videoSpeed" class="pill">1×</span></div><div class="hero-actions"><button class="btn" data-vseek="-10">↶ 10s</button><button class="btn" data-vseek="10">10s ↷</button><button class="btn" data-vspeed=".5">0.5×</button><button class="btn" data-vspeed="1">1×</button><button class="btn" data-vspeed="1.5">1.5×</button><button class="btn" data-vspeed="2">2×</button><button class="btn primary" id="videoNoteBtn">＋ Timestamp note</button><button class="btn" id="videoQuiz">Quiz</button></div></div></div><div class="card"><div class="eyebrow">PLAYLIST</div><h3 style="margin-top:6px">Course context</h3><div id="videoPlaylist" class="small muted" style="margin-top:7px">Official player keeps the YouTube playlist controls.</div></div></div></section></main>'+
     '<nav class="mobile-nav" id="mobileNav"></nav>'+
     authModal()+focusModal()+readerModal()+videoModal()+notifyModal()+
-    '<input id="imageInput" type="file" accept="image/*" class="hidden"><input id="pdfInput" type="file" accept="application/pdf" class="hidden">';
+    '<input id="imageInput" type="file" accept="image/*" class="hidden"><input id="pdfInput" type="file" accept="application/pdf,.txt,.md,text/plain,text/markdown,image/*,audio/*" class="hidden">';
   renderShell();
   authSetup();
 }
