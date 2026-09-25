@@ -27,7 +27,7 @@
         });
       },
       async signIn(email,password){return client.auth.signInWithPassword({email,password})},
-      async resend(email){return client.auth.resend({type:'signup',email,options:{emailRedirectTo:CONFIG.PRODUCTION_URL})},
+      async resend(email){return client.auth.resend({type:'signup',email,options:{emailRedirectTo:CONFIG.PRODUCTION_URL}})},
       async reset(email){return client.auth.resetPasswordForEmail(email,{redirectTo:CONFIG.PRODUCTION_URL})},
       async signOut(){return client.auth.signOut()}
     };
