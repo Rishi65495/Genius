@@ -232,7 +232,19 @@ function hookReader(){
  if(typeof window.idbPut==='function'&&!window.__lucidPutWrapped){const old=window.idbPut;window.idbPut=async function(store,obj){const result=await old(store,obj);if(store==='progress'&&auth()&&obj?.id){try{const b=(S.books||[]).find(x=>String(x.id)===String(obj.id));const rid=await resourceForBook(b);const cat=L.catalogue||await defaultCat();if(rid){const page=Math.max(1,Number(obj.page)||1),total=Math.max(1,Number(obj.totalPages)||1),completion=Math.min(100,Math.round(100*page/total));await SB().from('learning_journeys').upsert({owner_id:uid(),catalogue_id:cat.id,resource_id:rid,position:{page,scroll:Number(obj.scroll)||0,zoom:Number(R.zoomPercent||100)},completion,last_activity_at:new Date().toISOString()},{onConflict:'owner_id,catalogue_id,resource_id'});await track('page_entered',{page,total_pages:total},rid,cat.id)}}catch(e){console.warn('Lucid progress sync',e)}}return result};window.__lucidPutWrapped=true}
 }
 function hookImport(){const b=[...document.querySelectorAll('button')].find(x=>/add book|import pdf/i.test(x.textContent||''));if(b&&!b.parentElement.querySelector('.lucid-yt-import')){const y=document.createElement('button');y.className='btn-secondary lucid-yt-import';y.textContent='▶ YouTube';y.onclick=importLucidYouTube;b.parentElement.appendChild(y)}}
-async function boot(){if(L.booted)return;L.booted=true;nav();hookReader();hookImport();renderers.video();if(auth()){try{await userProfile();await migrate();const x=(await SB().from('user_xp').select('*').eq('user_id',uid()).maybeSingle()).data;if(x&&window.S?.user){S.user.xp=x.xp;S.user.level=x.level;S.streak=x.streak_days||0;localStorage.setItem('ll-user',JSON.stringify(S.user)}}catch(e){console.warn('Lucid boot',e)}}renderHomeFirst();openPage('dashboard');if(SB()?.auth?.onAuthStateChange)SB().auth.onAuthStateChange((ev,s)=>{if(s)setTimeout(()=>{L.booted=false;boot()},150)});window.addEventListener('online',()=>toast('Back online · cloud sync available.'));window.addEventListener('offline',()=>toast('Offline mode · local PDF reading remains available.'))}
+async function boot(){
+ if(L.booted)return;L.booted=true;
+ nav();hookReader();hookImport();renderers.video();
+ if(auth()){
+  try{await userProfile();await migrate();const x=(await SB().from('user_xp').select('*').eq('user_id',uid()).maybeSingle()).data;
+   if(x&&window.S?.user){S.user.xp=x.xp;S.user.level=x.level;S.streak=x.streak_days||0;localStorage.setItem('ll-user',JSON.stringify(S.user))}
+  }catch(e){console.warn('Lucid boot',e)}
+ }
+ renderHomeFirst();openPage('dashboard');
+ if(SB()?.auth?.onAuthStateChange)SB().auth.onAuthStateChange((ev,s)=>{if(s)setTimeout(()=>{L.booted=false;boot()},150)});
+ window.addEventListener('online',()=>toast('Back online · cloud sync available.'));
+ window.addEventListener('offline',()=>toast('Offline mode · local PDF reading remains available.'));
+}
 function renderHomeFirst(){renderers.dashboard?.()}
 window.Lucid={state:L,openPage,track,xp,ai,context,openFocus:openLucidFocus,startPractice:startLucidPractice};
 function ready(){if(window.llSupabase)boot();else setTimeout(ready,250)}
