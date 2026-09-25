@@ -107,39 +107,40 @@ async function importYouTube(){
  if(!signedIn()){toast('Sign in first.');return}
  const url=$('youtubeUrl').value.trim(),ids=parseYT(url);if(!ids.video&&!ids.list){toast('Invalid YouTube URL');return}
  let meta=null;
+ if(ids.video){
+  try{
+   const o=await fetch('https://www.youtube.com/oembed?url='+encodeURIComponent(url)+'&format=json');
+   if(o.ok){
+    const x=await o.json();
+    meta={title:x.title,channel_title:x.author_name,thumbnail:x.thumbnail_url};
+   }
+  }catch(e){console.warn('YouTube oEmbed',e)}
+ }
+ const title=meta?.title||(ids.list?'YouTube Playlist':'YouTube Lesson');
  try{
-  const sess=(await sb().auth.getSession()).data.session;
-  const resp=await fetch(C.SUPABASE_URL+'/functions/v1/youtube-import',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+sess.access_token,'apikey':C.SUPABASE_KEY},body:JSON.stringify({url})});
-  if(resp.ok)meta=await resp.json();
- }catch(e){console.warn('YouTube metadata',e)}
- if(!meta&&ids.video)try{const o=await fetch('https://www.youtube.com/oembed?url='+encodeURIComponent(url)+'&format=json');if(o.ok){const x=await o.json();meta={item:{snippet:{title:x.title,channelTitle:x.author_name,thumbnails:{high:{url:x.thumbnail_url}}}}}}catch(e){}
- const title=meta?.item?.snippet?.title||meta?.playlist?.snippet?.title||(ids.list?'YouTube Playlist':'YouTube Lesson');
- try{
-  const {data:r,error}=await sb().from('lucid_resources').insert({owner_id:uid(),type:ids.list?'playlist':'video',title,source_url:url,metadata:{youtube_video_id:ids.video,youtube_playlist_id:ids.list,channel_title:meta?.item?.snippet?.channelTitle||meta?.playlist?.snippet?.channelTitle||null}}).select().single();
+  const metadata={youtube_video_id:ids.video||null,youtube_playlist_id:ids.list||null,channel_title:meta?.channel_title||null,thumbnail:meta?.thumbnail||null};
+  const {data:r,error}=await sb().from('lucid_resources').insert({
+   owner_id:uid(),type:ids.list?'playlist':'video',title,source_url:url,metadata
+  }).select().single();
   if(error)throw error;
-  await sb().from('resource_videos').insert({resource_id:r.id,youtube_video_id:ids.video||null,youtube_playlist_id:ids.list||null,metadata:{source_url:url}});
+  await sb().from('resource_videos').insert({
+   resource_id:r.id,
+   youtube_video_id:ids.video||null,
+   youtube_playlist_id:ids.list||null,
+   metadata:{source_url:url}
+  });
   const cat=state.currentCat||await defaultCatalogue();
-  await sb().from('catalogue_resources').upsert({catalogue_id:cat.id,resource_id:r.id,order_index:999},{onConflict:'catalogue_id,resource_id'});
-  await sb().from('learning_journeys').upsert({owner_id:uid(),catalogue_id:cat.id,resource_id:r.id,position:{video_index:0,timestamp:0,speed:Number(localStorage.getItem('lucid-video-speed')||1)},completion:0,last_activity_at:nowIso()},{onConflict:'owner_id,catalogue_id,resource_id'});
-  if(ids.list&&Array.isArray(meta?.items)){
-    const items=meta.items.slice(0,100);
-    for(let i=0;i<items.length;i++){
-      const it=items[i],vid=it.contentDetails?.videoId||it.snippet?.resourceId?.videoId;
-      if(!vid)continue;
-      const child=(await sb().from('lucid_resources').select('id').eq('owner_id',uid()).eq('local_reference','yt:'+ids.list+':'+vid).maybeSingle()).data;
-      let childId=child?.id;
-      if(!childId){
-        const ins=await sb().from('lucid_resources').insert({owner_id:uid(),type:'video',title:it.snippet?.title||('Playlist item '+(i+1)),source_url:'https://www.youtube.com/watch?v='+vid,local_reference:'yt:'+ids.list+':'+vid,metadata:{youtube_video_id:vid,youtube_playlist_id:ids.list,playlist_index:i}}).select().single();
-        childId=ins.data?.id;
-        if(childId)await sb().from('resource_videos').insert({resource_id:childId,youtube_video_id:vid,youtube_playlist_id:ids.list,metadata:{playlist_index:i}});
-      }
-      if(childId){
-        await sb().from('catalogue_resources').upsert({catalogue_id:cat.id,resource_id:childId,order_index:1000+i},{onConflict:'catalogue_id,resource_id'});
-        await sb().from('learning_journeys').upsert({owner_id:uid(),catalogue_id:cat.id,resource_id:childId,position:{video_index:i,timestamp:0,speed:1},completion:0,last_activity_at:nowIso()},{onConflict:'owner_id,catalogue_id,resource_id'});
-      }
-    }
-  }
-  state.current=r;state.currentCat=cat;closeModal('videoModal');await renderLibrary();setPage('video');loadVideo(r,ids.video,ids.list,title);toast(ids.list?(meta?.items?.length?'Playlist imported · '+Math.min(100,meta.items.length)+' lessons ready ✓':'Playlist shell created · add YOUTUBE_API_KEY for metadata'):'YouTube lesson imported ✓');
+  await sb().from('catalogue_resources').upsert({
+   catalogue_id:cat.id,resource_id:r.id,order_index:999
+  },{onConflict:'catalogue_id,resource_id'});
+  await sb().from('learning_journeys').upsert({
+   owner_id:uid(),catalogue_id:cat.id,resource_id:r.id,
+   position:{video_index:0,timestamp:0,speed:Number(localStorage.getItem('lucid-video-speed')||1)},
+   completion:0,last_activity_at:nowIso()
+  },{onConflict:'owner_id,catalogue_id,resource_id'});
+  state.current=r;state.currentCat=cat;closeModal('videoModal');await renderLibrary();setPage('video');
+  loadVideo(r,ids.video,ids.list,title);
+  toast(ids.list?'Playlist imported ✓':'YouTube lesson imported ✓');
  }catch(e){toast('YouTube import failed: '+e.message)}
 }
 function loadVideo(r,video,list,title){
