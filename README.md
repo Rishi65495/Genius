@@ -1,6 +1,6 @@
 # Lucid — AI-powered collaborative learning OS
 
-This branch upgrades Genius/Leafline into the Lucid learning system described by the attached product blueprint.
+This repository contains the Lucid AI-powered learning system described by the product blueprint.
 
 ## Core connected loop
 
@@ -21,7 +21,7 @@ Goal → Catalogue → Content → Focus → Annotation → Understanding → Re
 - Achievements/badges with anti-grind XP ledger
 - Privacy controls and sparse notifications
 - Offline app shell / local PDF continuity
-- Idempotent compatibility migration for the existing Leafline database
+- Idempotent compatibility migration for the existing Lucid database
 - Server-side ai-learning and youtube-import Edge Functions
 
 ## Backend configuration
