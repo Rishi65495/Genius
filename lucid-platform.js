@@ -1,5 +1,5 @@
 /* Lucid v1 — learning OS orchestration layer.
-   Upgrades the existing Leafline single-page reader without breaking local PDFs/auth.
+   Extends the existing Lucid learning reader without breaking local PDFs/auth.
 */
 (function(){
 'use strict';
